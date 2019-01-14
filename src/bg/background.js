@@ -323,7 +323,7 @@ function checkSocket() {
     pos = getLocalStorageObj('pos');
     var query = 'apiKey=' + serverInfo.api_key + "&version=" + chrome.app.getDetails().version + '&' + pos + '&debug=' + (isDevMode() ? '1' : '0');
     if (serverInfo && serverInfo.user_id && !socket) {
-        socket = io.connect('http://kantoorroulette.nl', {
+        socket = io.connect('https://kantoorroulette.nl', {
             query: query,
             // path: (isDevMode()?'/socket.dev':'/socket.io'),
             path: '/socket.io',

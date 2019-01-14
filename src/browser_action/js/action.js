@@ -627,7 +627,7 @@ function updateParticipants() {
                 date = new Date(object.disabled);
                 participantDisabledHtml += '<span class="radius disabled label"><span class="disabled status" data-tooltip title="' + object.name + ' wil tot ' + (date.getHours() + ':' + date.getMinutes()) + ' niet gestoord worden."></span>' + object.name + '</span>';
             } else if (object.idle) {
-                participantIdleHtml += '<span class="radius idle label"><span class="idle status" data-tooltip title="Deze gebruiker lijkt niet aanwezig te zijn."></span>' + object.name + '</span>';
+                participantIdleHtml += '<span class="radius idle label"><span class="idle status" data-tooltip title="Afwezig"></span>' + object.name + '</span>';
             } else {
                 participantAvailableHtml += '<span class="radius online label"><span class="online status"></span>' + object.name + "</span>";
             }
