@@ -7,7 +7,9 @@ var socket = false;
 var serverInfo;
 var rouletteBusy = false;
 
-
+function isDevMode() {
+    return !('update_url' in chrome.runtime.getManifest());
+}
 
 var defaultSettings = {
     notification_new: true,
@@ -16,30 +18,57 @@ var defaultSettings = {
     speak_new: true,
     speak_reminder: true,
     speak_end_message: true,
-    disable_plugin: false
+    disable_plugin: false,
+    disabled_last_chosen: false
 };
 
 window.addEventListener('storage', storageEventHandler, false);
 function storageEventHandler(evt) {
     if (evt.key == "chatSentQueue") {
         processNewChatMessages();
-    } else if (evt.key == "chatRecQueue") {
-        fixIcon();
     } else if (evt.key == "changeParticipation") {
         var partObj = getLocalStorageObj('changeParticipation');
         if (partObj.reaction && (partObj.reaction == "1" || partObj.reaction == "2")) {
             socket.emit('request_response', partObj);
         }
         setLocalStorage('changeParticipation', []);
-    } else if (evt.key == "current_roulette") {
-        fixIcon();
     } else if (evt.key == "newRouletteRequest") {
         var sendObj = getLocalStorageObj('newRouletteRequest');
         if (sendObj.what)
             startRoulette(sendObj);
-        else
-            console.log("geen request");
+    } else if (evt.key == "settings") {
+        checkSettings();
     }
+}
+
+var disabledCd = false;
+var secondsLeftDisabled = false;
+function countDownDisabled() {
+    var settings = getLocalStorageObj('settings');
+    if (disabledCd)
+        clearTimeout(disabledCd);
+    var now = new Date();
+    var disabledPluginUntill = new Date(settings.disable_plugin);
+    secondsLeftDisabled = Math.floor((disabledPluginUntill - now) / 1000);
+
+    if (secondsLeftDisabled > 0) {
+        chrome.browserAction.setIcon({path: 'src/browser_action/img/icon_disabled.png'});
+        disabledCd = setTimeout(function () {
+            countDownDisabled();
+        }, 1000);
+    } else {
+        chrome.browserAction.setIcon({path: 'src/browser_action/img/icon.png'});
+        settings.disable_plugin = false;
+        secondsLeftDisabled = false;
+        popupMessage({messageText: 'Meldingen voor de Kantoor Roulette zijn weer ingeschakeld.'})
+        setLocalStorage('settings', settings);
+    }
+
+    if (secondsLeftDisabled % 20 === 0 || secondsLeftDisabled == false) {
+        if (socket)
+            socket.emit('user_disabled', {disabled: settings.disable_plugin});
+    }
+
 }
 
 function startRoulette(sendObj) {
@@ -47,18 +76,18 @@ function startRoulette(sendObj) {
     setLocalStorage('newRouletteRequest', []);
 }
 var fixIconTimer = false;
-function fixIcon() {
-    cur_roulette = getLocalStorageObj('current_roulette');
+var lastIconBadgeText = false;
+
+var updateSettings = 0;
+
+setInterval(function () {
+    var iconBadgeText = "";
+    var cur_roulette = getLocalStorageObj('current_roulette');
     if (cur_roulette && cur_roulette.roulette && Object.keys(cur_roulette.roulette).length !== 0) {
         var a = new Date(); // Now
         var b = new Date(cur_roulette.roulette.end_date);
-
-        var secondsLeft = Math.floor((b-a)/1000);
-
-        chrome.browserAction.setBadgeText({text: secondsLeft+""});
-        if (fixIconTimer)
-            clearTimeout(fixIconTimer);
-        fixIconTimer = setTimeout(function() {fixIcon()}, 1000)
+        var secondsLeft = Math.floor((b - a) / 1000);
+        iconBadgeText = secondsLeft + "";
     } else {
         var chatReceivedQueue = getLocalStorageObj('chatRecQueue');
         if (chatReceivedQueue.length) {
@@ -68,15 +97,23 @@ function fixIcon() {
                     receivedNum++;
             });
             if (receivedNum)
-                chrome.browserAction.setBadgeText({text: receivedNum < 11 ? (receivedNum + "") : "10+"});
+                iconBadgeText = receivedNum < 11 ? (receivedNum + "") : "10+";
             else
-                chrome.browserAction.setBadgeText({text: ""});
+                iconBadgeText = "";
         } else {
-            chrome.browserAction.setBadgeText({text: ""});
+            iconBadgeText = "";
         }
 
     }
-}
+
+    if (lastIconBadgeText != iconBadgeText) {
+        chrome.browserAction.setBadgeText({text: iconBadgeText});
+        lastIconBadgeText = iconBadgeText;
+    }
+
+    updateSettings++;
+
+}, 1000);
 
 function processNewChatMessages() {
     var newMessages = getLocalStorageObj('chatSentQueue');
@@ -94,6 +131,7 @@ setLocalStorage('changeParticipation', []);
 setLocalStorage('chatRecQueue', []);
 setLocalStorage('newRouletteRequest', []);
 setLocalStorage('participants', []);
+setLocalStorage('people_v2', []);
 setLocalStorage('request_response', []);
 setLocalStorage('current_roulette', []);
 setLocalStorage('roulettes', []);
@@ -110,7 +148,6 @@ if (settings === null) {
     for (var num in defaultSettings) {
         if (settings[num] === undefined) {
             settings[num] = defaultSettings[num];
-            console.log('nieuwe setting "'+num+'" aangemaakt!');
         }
     }
     setLocalStorage('settings', settings);
@@ -118,6 +155,7 @@ if (settings === null) {
 
 
 function startRequest() {
+    checkSettings();
     check();
     timerId = window.setTimeout(startRequest, pollInterval);
 }
@@ -145,7 +183,7 @@ function opsomming(array, orText) {
 }
 function check() {
     var posCb = function (position) {
-        var pos = 'la='+position.coords.latitude+'&lo='+position.coords.longitude; // TODO SP: Wordt niks mee gedaan, voor toekomstige positiegebasseerde roulette server
+        var pos = 'la=' + position.coords.latitude + '&lo=' + position.coords.longitude; // TODO SP: Wordt niks mee gedaan, voor toekomstige positiegebasseerde roulette server
         setLocalStorage('pos', pos);
     };
     navigator.geolocation.getCurrentPosition(posCb);
@@ -177,18 +215,57 @@ function addChatMessage(obj) {
 
     setLocalStorage('chatHistory', chatMessages);
     setLocalStorage('chatRecQueue', chatReceivedQueue);
-
-
-    fixIcon();
 }
 
+function checkSettings() {
+    var settings = getLocalStorageObj('settings');
+    var now = new Date();
+    if (settings.disable_plugin != false) {
+        var disabledPluginUntill = new Date(settings.disable_plugin);
+        var secondsLeft = Math.floor((disabledPluginUntill - now) / 1000);
+
+        if (secondsLeft > 0) {
+            countDownDisabled();
+        } else {
+            if (socket)
+                socket.emit('user_disabled', {disabled: false});
+            settings.disable_plugin = false;
+            setLocalStorage('settings', settings);
+        }
+    }
+}
+
+function popupMessage(obj) {
+    if (!secondsLeftDisabled)
+        chrome.notifications.create(
+            'verlopen', {
+                type: "basic",
+                iconUrl: "icons/icon48.png",
+                title: "Koffie Roulette!",
+                message: replaceName(obj.messageText.toString()),
+                priority: 9
+            },
+            function () {
+                if (obj.ttsText)
+                    chrome.tts.speak(replaceName(obj.ttsText.toString()), {
+                        'lang': 'nl-NL',
+                        rate: 1
+                    });
+            }
+        );
+}
+function replaceName(text) {
+    return text.replace('{userName}', serverInfo.name);
+}
 
 function checkSocket() {
     serverInfo = getLocalStorageObj('data');
     if (serverInfo && serverInfo.user_id && !socket) {
         pos = getLocalStorageObj('pos');
         socket = io.connect('http://kantoorroulette.nl', {
-            query: 'apiKey=' + serverInfo.api_key+"&version="+chrome.app.getDetails().version+'&'+pos,
+            query: 'apiKey=' + serverInfo.api_key + "&version=" + chrome.app.getDetails().version + '&' + pos + '&debug=' + (isDevMode() ? '1' : '0'),
+            // path: (isDevMode()?'/socket.dev':'/socket.io'),
+            path: '/socket.io',
             reconnection: true,
             timeout: 5000,
             reconnectionDelay: 10000
@@ -204,6 +281,7 @@ function checkSocket() {
         });
 
         socket.on('connect', function () {
+            check();
             addChatMessage({
                 message: 'Je bent nu verbonden!',
                 time: AddZero(new Date().getHours()) + ":" + AddZero(new Date().getMinutes())
@@ -224,9 +302,10 @@ function checkSocket() {
         socket.on('update-server-info', function (obj) {
             setLocalStorage('roulettes', obj.roulettes);
             setLocalStorage('participants', obj.people);
+            setLocalStorage('people_v2', obj.people_v2);
+
         });
         socket.on('update-to-current-roulette', function (obj) {
-            fixIcon();
             setLocalStorage('current_roulette', obj);
         });
         //
@@ -237,7 +316,7 @@ function checkSocket() {
 
         socket.on('initSpinnerData', function (obj) {
             popupMessage({
-                messageText: 'De roulette is gestart door '+obj.spinner
+                messageText: 'De roulette is gestart door ' + obj.spinner
             });
             setLocalStorage('init_spinner_data', obj);
         });
@@ -247,109 +326,88 @@ function checkSocket() {
         });
 
 
-        function replaceName(text) {
-            return text.replace('{userName}', serverInfo.name);
-        } 
 
-        function popupMessage(obj) {
-            chrome.notifications.create(
-                'verlopen', {
-                    type: "basic",
-                    iconUrl: "icons/icon48.png",
-                    title: "Koffie Roulette!",
-                    message: replaceName(obj.messageText.toString()),
-                    priority: 9
-                },
-                function () {
-                    if (obj.ttsText)
-                        chrome.tts.speak(replaceName(obj.ttsText.toString()), {
-                            'lang': 'nl-NL',
-                            rate: 1
-                        });
-                }
-            );
-        }
-        
+
         socket.on('popupMessage', function (obj) {
-            popupMessage(obj); 
+            popupMessage(obj);
         });
 
         socket.on('roulette_request', function (obj) {
-            var roulette_id = obj.roulette_data.roulette.roulette_id;
-            var notificationId = "R" + roulette_id;
-            rouletteInfoObj = getLocalStorageObj('rouletteInfo');
+            if (!secondsLeftDisabled) {
+                var roulette_id = obj.roulette_data.roulette.roulette_id;
+                var notificationId = "R" + roulette_id;
+                rouletteInfoObj = getLocalStorageObj('rouletteInfo');
 
-            if (!obj.roulette_data.participants[(getLocalStorageObj('data').user_id)].response) {
-                chrome.notifications.create(
-                    notificationId, {
-                        type: "basic",
-                        iconUrl: "icons/icon48.png",
-                        title: "Koffie Roulette!",
-                        message: replaceName(obj.messageText.toString()),
-                        buttons: [{
-                            title: "Ik ook!",
-                            iconUrl: "icons/icon48.png"
-                        },
-                            {
-                                title: "Nee, ik hoef niet..",
+                if (!obj.roulette_data.participants[(getLocalStorageObj('data').user_id)].response) {
+                    chrome.notifications.create(
+                        notificationId, {
+                            type: "basic",
+                            iconUrl: "icons/icon48.png",
+                            title: "Koffie Roulette!",
+                            message: replaceName(obj.messageText.toString()),
+                            buttons: [{
+                                title: "Ik ook!",
                                 iconUrl: "icons/icon48.png"
-                            }],
-                        priority: 9
-                    },
-                    function () {
-                        if (!rouletteInfoObj) {
-                            rouletteInfoObj = {};
-                        }
-                        if (!rouletteInfoObj[roulette_id]) {
-                            rouletteInfoObj[roulette_id] = {};
-                        }
+                            },
+                                {
+                                    title: "Nee, ik hoef niet..",
+                                    iconUrl: "icons/icon48.png"
+                                }],
+                            priority: 9
+                        },
+                        function () {
+                            if (!rouletteInfoObj) {
+                                rouletteInfoObj = {};
+                            }
+                            if (!rouletteInfoObj[roulette_id]) {
+                                rouletteInfoObj[roulette_id] = {};
+                            }
 
-                        if (obj.type == 'initial' && !rouletteInfoObj[roulette_id].initialNotification) {
-                            chrome.tts.speak(replaceName(obj.ttsText), {
-                                'lang': 'nl-NL',
-                                rate: 1
-                            });
-                            rouletteInfoObj[roulette_id].initialNotification = true;
-                        }
-                        if (obj.type == 'reminder' && !rouletteInfoObj[roulette_id].reminderNotification) {
-                            chrome.tts.speak(replaceName(obj.ttsText), {
-                                'lang': 'nl-NL',
-                                rate: 1
-                            });
-                            rouletteInfoObj[roulette_id].reminderNotification = true;
-                        }
+                            if (obj.type == 'initial' && !rouletteInfoObj[roulette_id].initialNotification) {
+                                chrome.tts.speak(replaceName(obj.ttsText), {
+                                    'lang': 'nl-NL',
+                                    rate: 1
+                                });
+                                rouletteInfoObj[roulette_id].initialNotification = true;
+                            }
+                            if (obj.type == 'reminder' && !rouletteInfoObj[roulette_id].reminderNotification) {
+                                chrome.tts.speak(replaceName(obj.ttsText), {
+                                    'lang': 'nl-NL',
+                                    rate: 1
+                                });
+                                rouletteInfoObj[roulette_id].reminderNotification = true;
+                            }
 
-                        setLocalStorage('rouletteInfo', rouletteInfoObj);
-                    }
-                );
-                chrome.notifications.onButtonClicked.addListener(function (notificationId, buttonIndex) {
-                    if (buttonIndex === 0) {
-                        chrome.notifications.clear(notificationId, function () {
-                            chrome.tts.speak("Ja, ik ook.", {
-                                'lang': 'nl-NL',
-                                rate: 1
+                            setLocalStorage('rouletteInfo', rouletteInfoObj);
+                        }
+                    );
+                    chrome.notifications.onButtonClicked.addListener(function (notificationId, buttonIndex) {
+                        if (buttonIndex === 0) {
+                            chrome.notifications.clear(notificationId, function () {
+                                chrome.tts.speak("Ja, ik ook.", {
+                                    'lang': 'nl-NL',
+                                    rate: 1
+                                });
+                                socket.emit('request_response', {
+                                    roulette_id: roulette_id,
+                                    reaction: "1"
+                                });
                             });
-                            socket.emit('request_response', {
-                                roulette_id: roulette_id,
-                                reaction: "1"
+                        }
+                        if (buttonIndex === 1) {
+                            chrome.notifications.clear(notificationId, function () {
+                                chrome.tts.speak("Nee, ik hoef niet.", {
+                                    'lang': 'nl-NL',
+                                    rate: 1
+                                });
+                                socket.emit('request_response', {
+                                    roulette_id: roulette_id,
+                                    reaction: "2"
+                                });
                             });
-                        });
-                    }
-                    if (buttonIndex === 1) {
-                        chrome.notifications.clear(notificationId, function () {
-                            chrome.tts.speak("Nee, ik hoef niet.", {
-                                'lang': 'nl-NL',
-                                rate: 1
-                            });
-                            socket.emit('request_response', {
-                                roulette_id: roulette_id,
-                                reaction: "2"
-                            });
-                        });
-                    }
-                });
-            } else {
-                console.log("Al geantwoord");
+                        }
+                    });
+                }
             }
             //setLocalStorage('current_roulette', obj);
         });
@@ -400,13 +458,10 @@ function checkSocket() {
 //    console.log(data);
 //}
 function addParticipantsMessage(data) {
-    console.log(data);
 }
 function removeChatTyping(data) {
-    console.log(data);
 }
 function addChatTyping(data) {
-    console.log(data);
 }
 
 startRequest();

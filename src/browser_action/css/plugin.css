@@ -1,8 +1,7 @@
-@import url(http://fonts.googleapis.com/css?family=Open+Sans:400italic,600italic,700italic,400,300,600,700|Press+Start+2P);
 
 body, html {
     height: auto;
-    font-size: 13px;
+    font-size: 14px;
 }
 
 #mainPopup {
@@ -17,7 +16,7 @@ body, html {
 
 h1 {
     font-size: 1.2em;
-    font-family: "Press start 2p", "open sans", Helvetica, sans-serif;
+    font-family: "open sans", Helvetica, sans-serif;
     margin: 4px 0;
     line-height: 40px;
     text-align: center;
@@ -33,8 +32,21 @@ h1 {
     right: 0;
 }
 
+.dnd-menu a {
+    background: #000549;
+    color: #FFF;
+}
+.dnd-menu li.active {
+    background: #b5e0fe;
+}
+
 header {
-    background: #1583cc;
+    background: #000549;
+}
+
+header .logo {
+    text-align: center;
+    padding: 3px 0 6px;
 }
 
 .helloUser {
@@ -64,6 +76,7 @@ header {
     margin-right: 2px;
     margin-bottom: 6px;
     font-size: 1.1rem;
+    background-color: #2ab136;
 }
 
 .disable_coffee {
@@ -118,7 +131,9 @@ input.newMessage {
 input.newMessage:focus {
     border: 0px;
 }
-
+.button {
+    background-color: #000549;
+}
 .no-select {
     -webkit-touch-callout: none;
     -webkit-user-select: none;
@@ -150,7 +165,7 @@ input.newMessage:focus {
     margin: 6px 0;
 }
 .advancedLink {
-    font-size: 0.6rem;
+    font-size: 0.7rem;
     margin: 4px 0;
 }
 .advanced input, .advanced select {

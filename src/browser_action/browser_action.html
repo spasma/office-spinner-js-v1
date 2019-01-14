@@ -7,12 +7,10 @@
     <link rel="stylesheet" type="text/css" href="css/font-awesome.min.css">
     <link rel="stylesheet" type="text/css" href="css/plugin.css">
     <link rel="stylesheet" type="text/css" href="css/wdt-emoji-bundle.css">
-
     <script src="js/jquery.js"></script>
     <script src="js/foundation.min.js"></script>
     <script src="js/emoji.min.js"></script>
     <script src="js/wdt-emoji-bundle.min.js"></script>
-
     <script src="js/action.js"></script>
     <script src="js/effects.js"></script>
     <!--<script src="js/colors.min.js"></script>-->
@@ -25,21 +23,25 @@
         <header onselect="return false">
             <div class="row logo collapse">
                 <span class="settings-toggle-container">
-                    <!--<a class="disable_coffee" data-toggle="example-dropdown-1"><i class="fa fa-bell"></i></a>-->
+                    <a class="disable_coffee" data-toggle="DND"><i class="fa fa-bell"></i></a>
                     <!--<a href="#" class="settings-toggle"><i class="fa fa-cog"></i></a>-->
                 </span>
-                <ul class="dropdown-pane menu small vertical" id="example-dropdown-1" data-dropdown data-hover="true" data-hover-pane="true">
-                    <li class="text-center" style="margin-bottom: 12px;">Niet storen voor:</li>
-                    <li class="remaining"></li>
-                    <li class="active"><a href="">Uit</a></li>
-                    <li><a>10 minuten</a></li>
-                    <li><a>15 minuten</a></li>
-                    <li><a>30 minuten</a></li>
-                    <li><a>1 uur</a></li>
-                    <li><a>12 uur</a></li>
-                </ul>
-                <div class="large-12 medium-12 small-12 columns">
-                    <h1 id="groovy">Kantoor Roulette</h1>
+                <div class="dropdown-pane small" id="DND" data-dropdown data-hover="true"
+                    data-hover-pane="true">
+                    <div class="text-center" style="margin-bottom: 12px;"><strong>Niet storen</strong></div>
+                    <div class="remaining"></div>
+                    <ul class="menu vertical dnd-menu">
+                    <li class="active"><a data-time="0">Uit</a></li>
+                    <li><a data-time="600">10 minuten</a></li>
+                    <li><a data-time="900">15 minuten</a></li>
+                    <li><a data-time="1800">30 minuten</a></li>
+                    <li><a data-time="3600">1 uur</a></li>
+                    <li><a data-time="43200">12 uur</a></li>
+                    <li><a data-time="today">Rest van de dag</a></li>
+                    </ul>
+                </div>
+                <div class="large-12 medium-12 small-12 columns logo">
+                    <img src="img/logo_kantoor_roulette.png"/>
                 </div>
             </div>
         </header>
@@ -53,16 +55,13 @@
                         data-tooltip><i class="fa fa-info-circle"></i></span>
                 </div>
                 <div class="large-12 medium-12 small-12 text-center">
-                    <a class="facebookConnect button" style="background: #3b5998;">
-                        <i class="fa fa-facebook-official"></i> Facebook
-                    </a>
-                    <a class="googleConnect button" style="background: #db4437;">
-                        <i class="fa fa-google"></i> Google Account
-                    </a>
+                    <a class="facebookConnect button" style="background: #3b5998;"> <i
+                            class="fa fa-facebook-official"></i> Facebook </a> <a class="googleConnect button"
+                                                                                  style="background: #db4437;"> <i
+                        class="fa fa-google"></i> Google Account </a>
                 </div>
             </div>
         </div>
-
         <div class="settings-container" style="display: none;">
             <div class="row">
                 <div class="large-12 medium-12 small-12 columns text-center settingsTitle">
@@ -79,12 +78,9 @@
             </div>
             <div class="row">
                 <div class="small-10 small-offset-2 columns">
-                    <label>
-                        <input disabled type="checkbox" data-setting="notification_new"> Melding bij nieuwe verzoeken
-                    </label>
-                    <label>
-                        <input disabled type="checkbox" data-setting="notification_reminder"> "Laatste minuut om mee te doen" Melding
-                    </label>
+                    <label> <input disabled type="checkbox" data-setting="notification_new"> Melding bij nieuwe
+                        verzoeken </label> <label> <input disabled type="checkbox" data-setting="notification_reminder">
+                    "Laatste minuut om mee te doen" Melding </label>
                 </div>
             </div>
             <div class="row">
@@ -94,16 +90,12 @@
             </div>
             <div class="row">
                 <div class="small-10 small-offset-2 columns">
-                    <label>
-                        <input disabled type="checkbox" data-setting="speak_new"> Spreek nieuwe verzoeken uit
-                    </label>
-                    <label>
-                        <input disabled type="checkbox" data-setting="speak_reminder"> "Laatste minuut om mee te doen" uitspreken
-                    </label>
+                    <label> <input disabled type="checkbox" data-setting="speak_new"> Spreek nieuwe verzoeken uit
+                    </label> <label> <input disabled type="checkbox" data-setting="speak_reminder"> "Laatste minuut om
+                    mee te doen" uitspreken </label>
                 </div>
             </div>
         </div>
-        
         <div class="loggedin" style="display: none;">
             <div class="row helloUser">
                 <div class="large-12 medium-12 small-12 columns text-center">
@@ -113,60 +105,43 @@
             <div class="row currently-container no-select">
                 <div class="large-12 medium-12 small-12">
                     <div>Momenteel aanwezig:</div>
-                    <div class="currently-available">
-
-                    </div>
+                    <div class="currently-available"></div>
                 </div>
             </div>
             <div id="content" class="row">
                 <div class="large-12 medium-12 small-12 columns roulette_request_container" style="display: none;">
                     <form method="post" class="roulette_form">
                         <div class="start_roulette">
-
                             <div class="row i_want_coffee_toggle_container">
                                 <div class="large-12 medium-12 small-12 text-center">
-                                    <a class="i_want_coffee_toggle button small">
-                                        <i class="fa fa-coffee"></i> Ik wil graag koffie!
-                                    </a>
+                                    <a class="i_want_coffee_toggle button small"> <i class="fa fa-coffee"></i> Ik wil
+                                        graag koffie! </a>
                                 </div>
                             </div>
-
                             <div class="row i_want_coffee_confirm" style="display: none;">
                                 <div class="large-12 medium-12 small-12 columns text-center">
                                     Je staat op het punt om een koffie aanvraag te doen, weet je het zeker?<br/>
                                 </div>
-
                                 <div class="advanced row" style="display: none;">
                                     <div class="medium-offset-2 large-offset-2 small-offset-2 large-8 medium-8 small-8 columns">
-                                    <label>
-                                        Roulette item
-                                        <input type="text" name="item" class="item" value="Koffie"/>
-                                    </label>
-                                    <label>
-                                        Wat?
-                                        <input type="text" name="what" class="what" value="halen"/>
-                                    </label>
-                                    <label>
-                                        Reageertijd
-                                        <select name="timeout" class="timeout">
-                                            <option value="600">10 minuten</option>
-                                            <option value="360">5 minuten</option>
-                                            <option value="180" selected>2,5 minuten (originele plugin)</option>
-                                            <option value="120">2 minuten</option>
-                                        </select>
-                                    </label>
+                                        <label> Roulette item <input type="text" name="item" class="item"
+                                                                     value="Koffie"/> </label> <label> Wat? <input
+                                            type="text" name="what" class="what" value="halen"/> </label> <label>
+                                        Reageertijd <select name="timeout" class="timeout">
+                                        <option value="600">10 minuten</option>
+                                        <option value="360">5 minuten</option>
+                                        <option value="180">2,5 minuten</option>
+                                        <option value="120">2 minuten</option>
+                                        <option value="60" selected>1 minuut</option>
+                                        <option value="30" selected>30 seconden</option>
+                                    </select> </label>
                                     </div>
                                 </div>
-
                                 <div class="large-12 medium-12 small-12 columns text-center confirm-buttons-container confirm_buttons">
-                                    <a class="i_want_coffee_start button small">
-                                        <i class="fa fa-coffee"></i> Ja, verstuur uitnodiging!
-                                    </a>
-                                    <a class="i_want_coffee_close button small">
-                                        <i class="fa fa-times"></i> <span>Nee</span>
-                                    </a>
+                                    <a class="i_want_coffee_start button small"> <i class="fa fa-coffee"></i> Ja,
+                                        verstuur uitnodiging! </a> <a class="i_want_coffee_close button small"> <i
+                                        class="fa fa-times"></i> <span>Nee</span> </a>
                                 </div>
-
                                 <div class="large-12 medium-12 small-12 columns text-center advancedLink">
                                     <a href="#" class="geavanceerd">Geavanceerd</a>
                                 </div>
@@ -177,32 +152,21 @@
                             <div class="i_want_coffee_load" style="display: none;"><i class="fa fa-refresh fa-spin"></i>
                                 Een moment geduld.
                             </div>
-
                         </div>
                     </form>
                 </div>
                 <div class="large-12 medium-12 small-12 columns current_roulette_container" style="display: none">
-                        <h1>Huidige Aanvraag</h1>
-                    <div class="text-center request_text">
-                        
-                    </div>
+                    <h1>Huidige Aanvraag</h1>
+                    <div class="text-center request_text"></div>
                     <div class='request_spin text-center'></div>
-                    <div class="request_participants">
-                        
-                    </div>
+                    <div class="request_participants"></div>
                 </div>
             </div>
-            <div class="row roulettes columns" style="display: none;">
-                
-            </div>
-            <div class="chat-spacer">
-
-            </div>
+            <div class="row roulettes columns" style="display: none;"></div>
+            <div class="chat-spacer"></div>
             <div class="row chat columns">
                 <span>Chat</span>
-                <div class="messages-container">
-
-                </div>
+                <div class="messages-container"></div>
                 <div>
                     <input type="text" class="newMessage form-control" placeholder="Typ een chatbericht.."/>
                 </div>
@@ -220,16 +184,16 @@
     <a href="#" class="wdt-emoji-popup-mobile-closer"> &times; </a>
     <div class="wdt-emoji-menu-content">
         <div id="wdt-emoji-menu-header">
-            <a class="wdt-emoji-tab active" data-group-name="Recent"></a>
-            <a class="wdt-emoji-tab" data-group-name="People"></a>
-            <a class="wdt-emoji-tab" data-group-name="Nature"></a>
-            <a class="wdt-emoji-tab" data-group-name="Foods"></a>
-            <a class="wdt-emoji-tab" data-group-name="Activity"></a>
-            <a class="wdt-emoji-tab" data-group-name="Places"></a>
-            <a class="wdt-emoji-tab" data-group-name="Objects"></a>
-            <a class="wdt-emoji-tab" data-group-name="Symbols"></a>
-            <a class="wdt-emoji-tab" data-group-name="Flags"></a>
-            <a class="wdt-emoji-tab" data-group-name="Custom"></a>
+            <a class="wdt-emoji-tab active" data-group-name="Recent"></a> <a class="wdt-emoji-tab"
+                                                                             data-group-name="People"></a> <a
+                class="wdt-emoji-tab" data-group-name="Nature"></a> <a class="wdt-emoji-tab"
+                                                                       data-group-name="Foods"></a> <a
+                class="wdt-emoji-tab" data-group-name="Activity"></a> <a class="wdt-emoji-tab"
+                                                                         data-group-name="Places"></a> <a
+                class="wdt-emoji-tab" data-group-name="Objects"></a> <a class="wdt-emoji-tab"
+                                                                        data-group-name="Symbols"></a> <a
+                class="wdt-emoji-tab" data-group-name="Flags"></a> <a class="wdt-emoji-tab"
+                                                                      data-group-name="Custom"></a>
         </div>
         <div class="wdt-emoji-scroll-wrapper">
             <div id="wdt-emoji-menu-items">
@@ -243,17 +207,14 @@
             <div id="wdt-emoji-preview">
                 <span id="wdt-emoji-preview-img"></span>
                 <div id="wdt-emoji-preview-text">
-                    <span id="wdt-emoji-preview-name"></span><br>
-                    <span id="wdt-emoji-preview-aliases"></span>
+                    <span id="wdt-emoji-preview-name"></span><br> <span id="wdt-emoji-preview-aliases"></span>
                 </div>
             </div>
-
             <div id="wdt-emoji-preview-bundle">
                 <span>WDT Emoji Bundle</span>
             </div>
         </div>
     </div>
 </div>
-
 </body>
 </html>

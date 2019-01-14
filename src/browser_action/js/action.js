@@ -5,9 +5,9 @@ var participants;
 var socket;
 var myId;
 
-$(function() {
+$(function () {
     wdtEmojiBundle.defaults.emojiSheets = {
-        'apple'   : 'sheets/sheet_apple_64.png',
+        'apple': 'sheets/sheet_apple_64.png',
     };
     //
     wdtEmojiBundle.init('.wdt-emoji-bundle-enabled');
@@ -43,7 +43,7 @@ function createMessageHtml(obj) {
     //fa fa-plus-circle
 
 
-    return '<div class="row"><div class="large-12 medium-12 small-12 columns">' + wdtEmojiBundle.render(text) + '</div></div>';
+    return '<div class="row collapse"><div class="large-12 medium-12 small-12">' + wdtEmojiBundle.render(text) + '</div></div>';
 }
 
 function updateData() {
@@ -55,7 +55,7 @@ function updateData() {
         myId = data.user_id;
         $('.login').hide();
         updateParticipants();
-        
+
 
         var uur = new Date().getHours();
         var tijdsstipText = "";
@@ -71,14 +71,14 @@ function updateData() {
         $("span.dagWens").html(tijdsstipText);
         $("span.name").html(data.name);
         updateRoulettes();
-        
         currentRoulette(true);
         setLocalStorage('chatRecQueue', []);
-        
+
         //processInitRoulette();
-        
+
         var chatMessagesObj = getLocalStorageObj('chatHistory');
         var chatMessages = [];
+        if (chatMessagesObj !== null)
         $.each(chatMessagesObj, function (id, obj) {
             chatMessages.push(createMessageHtml(obj));
         });
@@ -95,34 +95,35 @@ function AddZero(num) {
 function updateRoulettes() {
     var roulettes = getLocalStorageObj('roulettes');
     //$('.roulettes').html("");
-    
-    $.each(roulettes, function (num, roulette) {
-            
-        //$('.roulettes').append('<div class="large-12 medium-12 small-12 columns"><i class="fa fa-plus-circle fa-spin"></i> '+roulette.roulette_item+'</div>')
-        var date = new Date(roulette.date);
+    if (roulettes !== null) {
+        $.each(roulettes, function (num, roulette) {
 
-        if (date.getDate() == new Date().getDate()) {
-            if ($('[data-row-roulette="' + roulette.roulette_id + '"]').length) {
-                rouletteContent(roulette);
-                //$('[data-row-roulette="' + roulette.roulette_id + '"] .content').html(newContent);
-            } else {
-                $('.roulettes').prepend("<div class='row' data-row-roulette='" + roulette.roulette_id + "'>" +
-                    "<div class='large-12 medium-12 small-12 columns'>" +
-                    "<div class='click-bar open_roulette' data-roulette='" + roulette.roulette_id + "' style='text-align: left;'>" +
-                    "<a href='#' style='color: #cecece'>" + AddZero(date.getHours()) + ":" + AddZero(date.getMinutes()) + " : <i class='fa "+(roulette.roulette_item.substr(0, 6).toLowerCase() == "koffie"?"fa-coffee":"fa-plus-circle")+" "+(roulette.loser?'':'fa-spin')+"'></i> " + roulette.roulette_item + " " + roulette.roulette_what + " aanvraag: " + roulette.initiator + "</a></div>" +
-                    "<div class='content'>" +
-                    rouletteContent(roulette) +
-                    "</div>" +
-                    "</div>" +
-                    "</div>" +
-                    "</div>");
+            //$('.roulettes').append('<div class="large-12 medium-12 small-12 columns"><i class="fa fa-plus-circle fa-spin"></i> '+roulette.roulette_item+'</div>')
+            var date = new Date(roulette.date);
+
+            if (date.getDate() == new Date().getDate()) {
+                if ($('[data-row-roulette="' + roulette.roulette_id + '"]').length) {
+                    rouletteContent(roulette);
+                    //$('[data-row-roulette="' + roulette.roulette_id + '"] .content').html(newContent);
+                } else {
+                    $('.roulettes').prepend("<div class='row' data-row-roulette='" + roulette.roulette_id + "'>" +
+                        "<div class='large-12 medium-12 small-12 columns'>" +
+                        "<div class='click-bar open_roulette' data-roulette='" + roulette.roulette_id + "' style='text-align: left;'>" +
+                        "<a href='#' style='color: #cecece'>" + AddZero(date.getHours()) + ":" + AddZero(date.getMinutes()) + " : <i class='fa " + (roulette.roulette_item.substr(0, 6).toLowerCase() == "koffie" ? "fa-coffee" : "fa-plus-circle") + " " + (roulette.loser ? '' : 'fa-spin') + "'></i> " + roulette.roulette_item + " " + roulette.roulette_what + " aanvraag: " + roulette.initiator + "</a></div>" +
+                        "<div class='content'>" +
+                        rouletteContent(roulette) +
+                        "</div>" +
+                        "</div>" +
+                        "</div>" +
+                        "</div>");
+                }
             }
+        });
+        $('.roulettes .row:first .click-bar a').css('color', '#000');
+        if ($('.roulette_participants:visible').length == 0 || $('.roulette_participants:visible').length > 1) {
+            $('.roulette_participants').hide();
+            $('.roulette_participants:first').show();
         }
-    });
-    $('.roulettes .row:first .click-bar a').css('color', '#000');
-    if ($('.roulette_participants:visible').length == 0 || $('.roulette_participants:visible').length > 1) {
-        $('.roulette_participants').hide();
-        $('.roulette_participants:first').show();
     }
 }
 function rouletteContent(roulette) {
@@ -135,7 +136,7 @@ function rouletteContent(roulette) {
     if ($('[data-row-roulette="' + roulette.roulette_id + '"]').length) {
         $('[data-row-roulette="' + roulette.roulette_id + '"] .participants').html(partHtml);
         if (roulette.loser) {
-            $('[data-row-roulette="' + roulette.roulette_id + '"] .losers').html(roulette.loser + ' was de verliezer').css({ color: 'red' });
+            $('[data-row-roulette="' + roulette.roulette_id + '"] .losers').html(roulette.loser + ' was de verliezer' + '<form><input type="text" value="Hallo" /></form>').css({color: 'red'});
             $('[data-row-roulette="' + roulette.roulette_id + '"] .spin_roulette').hide();
         } else
             $('[data-row-roulette="' + roulette.roulette_id + '"] .losers').html('Nog geen verliezer bepaald');
@@ -145,7 +146,7 @@ function rouletteContent(roulette) {
 
     return "" +
         "<div class='roulette_participants roulette_" + roulette.roulette_id + "' data-roulette='" + roulette.roulette_id + "' style='display: none;'>" +
-        "<div class='losers text-center' style='padding: 0px 12px 12px 12px; font-size: 12px;'>"+(roulette.loser?roulette.loser+' was de verliezer':'')+"</div> " +
+        "<div class='losers text-center' style='padding: 0px 12px 12px 12px; font-size: 12px;'>" + (roulette.loser ? roulette.loser + ' was de verliezer' : '') + "</div> " +
         "<div class='spin text-center'><a class='button spin_roulette' data-roulette='" + roulette.roulette_id + "' data-spincode='" + roulette.spin_code + "' style='width: 100%;'>Spin deze roulette</a></div>" +
         "<div class='participants'>" + partHtml + "</div>" +
         "</div>";
@@ -157,7 +158,44 @@ function updateSettingsWindow() {
         $(el).prop('checked', settings[$(el).data('setting')]);
     })
 }
+
+function resetDisabled() {
+    $('.dnd-menu li').removeClass('active');
+    $('.dnd-menu li:first').addClass('active');
+    $('.disable_coffee .fa').addClass('fa-bell').removeClass('fa-bell-slash');
+}
+
+var settings;
+var disabledCd = false;
+function countDownDisabled() {
+    var settings = getLocalStorageObj('settings');
+    if (disabledCd)
+        clearTimeout(disabledCd);
+    var now = new Date();
+    var disabledPluginUntill = new Date(settings.disable_plugin);
+    var secondsLeft = Math.floor((disabledPluginUntill - now) / 1000);
+
+    if (secondsLeft > 0) {
+        console.log(secondsLeft);
+        $("#DND .remaining").html("nog "+secondsLeft+" seconden.");
+        disabledCd = setTimeout(function() { countDownDisabled(); },1000);
+    } else {
+        $("#DND .remaining").html("")
+        settings.disable_plugin = false
+        setLocalStorage('settings', settings);
+    }
+
+}
+
 $(function () {
+
+    var posCb = function (position) {
+        var pos = 'la='+position.coords.latitude+'&lo='+position.coords.longitude; // TODO SP: Wordt niks mee gedaan, voor toekomstige positiegebasseerde roulette server
+        setLocalStorage('pos', pos);
+    };
+    navigator.geolocation.getCurrentPosition(posCb);
+
+
     $currentInput = $('.newMessage').focus();
     $inputMessage = $('.newMessage');
     setLocalStorage('request_response', {});
@@ -194,23 +232,68 @@ $(function () {
         $('.advanced').slideDown();
     });
 
-    $('.disable_coffee').click(function() {
+    // $('.disable_coffee').click(function () {
+    //     var settings = getLocalStorageObj('settings');
+    //
+    //     // if (settings.disable_plugin !== false) {
+    //     //     settings.disable_plugin = false;
+    //     // }
+    //
+    //     setLocalStorage('settings', settings);
+    // });
+
+    $('.dnd-menu a').click(function() {
         var settings = getLocalStorageObj('settings');
 
-        if (settings.disable_plugin !== false) {
+        // if (settings.disable_plugin !== false) {
+        settings.disabled_last_chosen = $(this).data('time');
+        if ($(this).data('time') == "today") {
+            var d = new Date();
+            d.setHours(24,0,0,0);
+            settings.disable_plugin = d;
+            $('.disable_coffee .fa').addClass('fa-bell-slash').removeClass('fa-bell');
+        } else if ($(this).data('time') == "0") {
             settings.disable_plugin = false;
-            $('.disable_coffee .fa').addClass('fa-bell').removeClass('fa-bell-slash-o');
+            $('.disable_coffee .fa').addClass('fa-bell').removeClass('fa-bell-slash');
         } else {
-            $('.disable_coffee .fa').addClass('fa-bell-slash-o').removeClass('fa-bell');
-            settings.disable_plugin = 3600;
+            var t = new Date();
+            t.setSeconds(t.getSeconds() + $(this).data('time'));
+            settings.disable_plugin = t;
+            $('.disable_coffee .fa').addClass('fa-bell-slash').removeClass('fa-bell');
         }
+
+        $('.dnd-menu li').removeClass('active');
+        $(this).parent().addClass('active');
+
         setLocalStorage('settings', settings);
+
     });
+
+
+
+    var settings = getLocalStorageObj('settings');
+    var now = new Date();
+    if (settings.disable_plugin != false) {
+        var disabledPluginUntill = new Date(settings.disable_plugin);
+        var secondsLeft = Math.floor((disabledPluginUntill - now) / 1000);
+
+        if (secondsLeft > 0) {
+            countDownDisabled();
+            $('.disable_coffee .fa').addClass('fa-bell-slash').removeClass('fa-bell');
+                $('.dnd-menu li').removeClass('active');
+            if ($('.dnd-menu a[data-time="'+settings.disabled_last_chosen+'"]').length) {
+                $('.dnd-menu a[data-time="'+settings.disabled_last_chosen+'"]').parent().addClass('active');
+            }
+
+        } else {
+            settings.disable_plugin = false;
+            setLocalStorage('settings', settings);
+        }
+    }
+
 
     $('.settings-toggle').click(function () {
         updateSettingsWindow()
-        console.log($(this));
-        console.log($(this).find('.fa'));
 
         if ($(this).find('.fa').hasClass('fa-cog')) {
             $(this).find('.fa').toggleClass('fa-cog fa-arrow-circle-left')
@@ -234,8 +317,6 @@ $(function () {
     });
 
 
-
-
     $('.i_want_coffee_toggle').click(function () {
         $('.i_want_coffee_toggle_container').slideToggle(300);
         if (iwant_timer)
@@ -251,19 +332,19 @@ $(function () {
 
         $(".i_want_coffee_confirm").slideToggle(300);
     });
-    
+
     $('.i_want_coffee_close').click(function () {
         if (iwant_timer)
             clearTimeout(iwant_timer);
 
+        $(".i_want_coffee_confirm").slideUp(100);
         $(".i_want_coffee_toggle_container").slideDown(300);
-        //$(".i_want_coffee_confirm").slideUp(300);
         iwant_timer = false;
     });
     $('.i_want_coffee_start').click(function () {
         initiateRoulette();
     });
-    
+
     $('.roulettes').on('click', '.open_roulette', function () {
         if ($(this).data('roulette') != $('.roulette_participants:visible').data('roulette'))
             $('.roulette_participants:visible').slideUp(200);
@@ -272,10 +353,10 @@ $(function () {
 
     });
     $('.roulettes, .current_roulette_container').on('click', '.spin_roulette', function () {
-        var newURL = "http://kantoorroulette.nl/apiv2/spin/roulette_id/" + ($(this).data('roulette')+"?code="+$(this).data('spincode'));
+        var newURL = "http://kantoorroulette.nl/apiv2/spin/roulette_id/" + ($(this).data('roulette') + "?code=" + $(this).data('spincode'));
         chrome.tabs.create({url: newURL});
     });
-    
+
     function countDown() {
         if (iwant_countdown)
             clearTimeout(iwant_countdown);
@@ -302,7 +383,7 @@ function getLocalStorageObj(name) {
 }
 
 function opsomming(array, orText) {
-    if (array.length > 1) {
+    if (array instanceof Array && array.length > 1) {
 
         var ret = "";
         var lastItem = array.pop();
@@ -374,7 +455,6 @@ $(window).keydown(function (event) {
 
 window.addEventListener('storage', storageEventHandler, false);
 function storageEventHandler(evt) {
-    console.log(evt);
     if (evt.key == "chatRecQueue") {
         processNewChatMessages(evt);
     } else if (evt.key == "request_response") {
@@ -420,21 +500,27 @@ var responseHtmlDone = {
 };
 
 function updateParticipants() {
-    participants = getLocalStorageObj('participants');
+    participants = getLocalStorageObj('people_v2');
     var participantHtml = "";
-
-    $.each(participants, function (id, name) {
-        participantHtml += "<span class='radius success label'>" + name + "</span>";
-    });
-    if ($('.currently-available').html() != participantHtml) {
-        $('.currently-available').html(participantHtml)
+    if (participants !== null) {
+        $.each(participants, function (id, object) {
+            var date = false;
+            if (object.disabled)
+                date = new Date(object.disabled);
+            participantHtml += "<span class='radius label' "+(object.disabled?"data-tooltip title='"+object.name+" wil tot "+(date.getHours()+":"+date.getMinutes())+" niet gestoord worden.'":"")+">" + object.name + (object.disabled?' <i class="fa fa-bell-slash"></i>': '') + "</span>";
+        });
+        if ($('.currently-available').html() != participantHtml) {
+            $('.currently-available').html(participantHtml)
+        }
     }
+    $(document).foundation();
 }
 function currentRoulette(noEffect) {
     if (currentRouletteTimer)
         clearInterval(currentRouletteTimer);
     current_roulette = getLocalStorageObj('current_roulette');
-    if (Object.keys(current_roulette.roulette).length !== 0) {
+    console.log(current_roulette);
+    if (!Array.isArray(current_roulette) && (current_roulette !== null && (current_roulette.length || typeof current_roulette == "object") && typeof current_roulette === 'object' && Object.keys(current_roulette.roulette).length !== 0)) {
         if (noEffect) {
             $('.roulette_request_container:visible, .roulettes:visible').hide();
             $('.current_roulette_container:hidden').show();
@@ -444,42 +530,41 @@ function currentRoulette(noEffect) {
         }
         var a = new Date(); // Now
         var b = new Date(current_roulette.roulette.end_date);
-        var secondsLeft = Math.floor((b-a)/1000);
+        var secondsLeft = Math.floor((b - a) / 1000);
 
-        $('.request_text').html(current_roulette.roulette.roulette_item+" "+current_roulette.roulette.roulette_what+" (aanvraag door "+current_roulette.roulette.initiator+")");
-        $('.request_time').html(secondsLeft+" seconden te gaan.");
+        $('.request_text').html(current_roulette.roulette.roulette_item + " " + current_roulette.roulette.roulette_what + " (aanvraag door " + current_roulette.roulette.initiator + ")");
+        $('.request_time').html(secondsLeft + " seconden te gaan.");
 
         var numWant = 0;
         var numParticipants = Object.keys(current_roulette.participants).length;
 
         for (var user_id in current_roulette.participants) {
-            if ($('.request_participants>.part_'+user_id).length == 0) {
-                $('.request_participants').append($("<div data-response='"+current_roulette.participants[user_id].response+"' class='row participant part_"+user_id+"'><div class='large-8 medium-8 small-8 columns name'>"+current_roulette.participants[user_id].name+"</div><div class='large-4 medium-4 small-4 columns response'>"+(myId == user_id ? responseHtmlSelf[current_roulette.participants[user_id].response] : responseHtml[current_roulette.participants[user_id].response])+"</div></div>"));
+            if ($('.request_participants>.part_' + user_id).length == 0) {
+                $('.request_participants').append($("<div data-response='" + current_roulette.participants[user_id].response + "' class='row participant part_" + user_id + "'><div class='large-8 medium-8 small-8 columns name'>" + current_roulette.participants[user_id].name + "</div><div class='large-4 medium-4 small-4 columns response'>" + (myId == user_id ? responseHtmlSelf[current_roulette.participants[user_id].response] : responseHtml[current_roulette.participants[user_id].response]) + "</div></div>"));
             } else {
                 //if ($('.request_participants>.part_'+user_id).data('response') != current_roulette.participants[user_id].response) {
-                    $('.request_participants>.part_'+user_id+' .response').html(
-                        myId == user_id ? responseHtmlSelf[current_roulette.participants[user_id].response] : responseHtml[current_roulette.participants[user_id].response]
-                    );
+                $('.request_participants>.part_' + user_id + ' .response').html(
+                    myId == user_id ? responseHtmlSelf[current_roulette.participants[user_id].response] : responseHtml[current_roulette.participants[user_id].response]
+                );
                 //}
             }
             if (current_roulette.participants[user_id].response == 1 || current_roulette.participants[user_id].response == 2)
                 numWant++;
         }
 
-console.log(numWant == numParticipants, numWant, numParticipants);
         if (numWant == numParticipants) {
             $('.request_spin').html("<a class='button spin_roulette' data-roulette='" + current_roulette.roulette.roulette_id + "' data-spincode='" + current_roulette.roulette.spin_code + "' style='width: 100%;'>Spin deze roulette</a>");
         } else {
             $('.request_spin').html("");
         }
 
-        $('button.changeYes').click(function() {
+        $('button.changeYes').click(function () {
             setLocalStorage('changeParticipation', {reaction: 1, roulette_id: current_roulette.roulette.roulette_id})
         });
-        $('button.changeNo').click(function() {
+        $('button.changeNo').click(function () {
             setLocalStorage('changeParticipation', {reaction: 2, roulette_id: current_roulette.roulette.roulette_id})
         });
-        
+
         //$('.request_participants').html();
 
     } else {
@@ -492,8 +577,10 @@ console.log(numWant == numParticipants, numWant, numParticipants);
             $('.current_roulette_container').slideUp(400);
         }
     }
-    
-    currentRouletteTimer = setTimeout(function() { currentRoulette() }, 2000);
+
+    currentRouletteTimer = setTimeout(function () {
+        currentRoulette()
+    }, 2000);
 }
 
 function processNewChatMessages(evt) {
@@ -510,7 +597,7 @@ function processNewChatMessages(evt) {
 function processInitRoulette() {
     var spinner_data = getLocalStorageObj('init_spinner_data');
     if (spinner_data && spinner_data.users) {
-        
+
         initGebruikers = spinner_data.initGebruikers;
         users = spinner_data.users;
         users2 = spinner_data.users2;
@@ -520,13 +607,13 @@ function processInitRoulette() {
         for (i = 0; i < users.length; i++) {
             Colors[i] = $c.rand();
         }
-        
+
         $("#drawing_canvas").show();
         startAll();
     }
 }
 var Colors = {};
-var initGebruikers=[];
-var users=[];
-var users2=[];
-var users3=[];
+var initGebruikers = [];
+var users = [];
+var users2 = [];
+var users3 = [];
