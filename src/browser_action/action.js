@@ -7,6 +7,20 @@ $(function () {
         localStorage.setItem('data', JSON.stringify(obj));
     }
 
+
+    var uur = new Date().getHours();
+    var tijdsstipText = "";
+    if (uur >= 18)
+        tijdsstipText = 'Goedenavond';
+    else if (uur >= 12)
+        tijdsstipText = 'Goedemiddag';
+    else if (uur >= 6)
+        tijdsstipText = 'Goedemorgen';
+    else
+        tijdsstipText = 'Goedenacht';
+
+    $(".dagWens").html(tijdsstipText);
+
     function getLocalStorageObj(name) {
         var retrievedObject = localStorage.getItem(name);
         return JSON.parse(retrievedObject);

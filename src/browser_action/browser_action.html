@@ -1,33 +1,45 @@
 <!doctype html>
-<style type="text/css">
-    #mainPopup {
-        padding: 10px;
-        height: auto;
-        width: 300px;
-        font-family: Helvetica, Ubuntu, Arial, sans-serif;
-    }
+<head>
+    <style type="text/css">
+        @import url(http://fonts.googleapis.com/css?family=Open+Sans:400italic,600italic,700italic,400,300,600,700|Press+Start+2P);
 
-    h1 {
-        font-size: 2em;
-    }
-</style>
-<script src="jquery.js"></script>
-<script src="action.js"></script>
+        #mainPopup {
+            padding: 6px;
+            height: auto;
+            width: 300px;
+            font-family: Helvetica, Ubuntu, Arial, sans-serif;
+        }
 
+        h1 {
+            font-size: 1.3em;
+            text-align: center;
+            padding: 2px;
+            font-family: "Press start 2p", "open sans", Helvetica, sans-serif;
+        }
+
+        .currently_available {
+            margin-bottom: 12px;
+        }
+
+        .confirm_buttons {
+            margin-top: 9px;
+        }
+    </style>
+    <script src="jquery.js"></script>
+    <script src="action.js"></script>
+</head>
+<body>
 <div id="mainPopup">
-    <h1 style="text-align: center;"><img style="width: 40px;" src="img/icon.png"/><br/>Koffie Roulette</h1>
+    <h1><span><img style="width: 25px;  margin-right: 6px;" src="img/icon.png"/></span>Kantoor Roulette</h1>
 
     <div class="loggedin" style="display: none; text-align: center;">
         <p style="display: block;">
-            Hallo <span class="name" style="font-weight: bold;"></span>!
+            <span class="dagWens"></span> <span class="name" style="font-weight: bold;"></span>!
         </p>
 
         <form method="post" class="roulette_form">
             <input type="hidden" name="item" value="Koffie"/>
             <input type="hidden" name="what" value="halen"/>
-            <!--<p>-->
-            <!--Selecteer wie je uit wil nodigen voor de roulette<br/>-->
-            <!--</p>-->
 
             <p style="display: none;">
                 <label>
@@ -35,15 +47,7 @@
                 </label>
             </p>
 
-            <div class="specific">
-                <!--<p>-->
-                <!--<a class="select_all" href="#">Iedereen</a> - <a class="select_none" href="#">Niemand</a>-->
-                <!--</p>-->
-                <!---->
-                <!--<p class="participants" style="margin-left: 30%; width: 80%; text-align: left"></p>-->
-            </div>
-            <p class="start_roulette" style="display: block; text-align: center;">
-
+            <div class="start_roulette" style="display: block; text-align: center;">
                 <label style="display: none;">
                     Reageertijd
                     <select name="timeout">
@@ -53,16 +57,19 @@
                     </select>
                 </label>
 
-            <div class="i_want_coffee_toggle_container">
-                <input class="i_want_coffee_toggle" type="button" value="Ik wil Koffie!"/>
-            </div>
-            <div class="i_want_coffee_confirm" style="display: none; padding: 12px;">
-                Je staat op het punt om een koffie aanvraag te doen, weet je het zeker?<br/>
-                <input class="i_want_coffee_start" type="button" value="Ja, verstuur uitnodiging!"/> - <input
-                    class="i_want_coffee_close" type="button" value="Nee"/>
-            </div>
-            <span class="i_want_coffee_done" style="display: none;">Uw verzoek is verstuurd!</span>
-            <span class="i_want_coffee_error" style="display: none;">Er is nog een koffieverzoek bezig!</span>
+                <div class="i_want_coffee_toggle_container">
+                    <input class="i_want_coffee_toggle" type="button" value="Ik wil graag koffie!"/>
+                </div>
+                <div class="i_want_coffee_confirm" style="display: none; padding: 9px;">
+                    Je staat op het punt om een koffie aanvraag te doen, weet je het zeker?<br/>
+
+                    <p class="confirm_buttons">
+                        <input class="i_want_coffee_start" type="button" value="Ja, verstuur uitnodiging!"/> - <input
+                            class="i_want_coffee_close" type="button" value="Nee"/>
+                    </p>
+                </div>
+                <span class="i_want_coffee_done" style="display: none;">Uw verzoek is verstuurd!</span>
+                <span class="i_want_coffee_error" style="display: none;">Er is nog een koffieverzoek bezig!</span>
                 <span class="currenly_available_container"
                       style="display: block; margin-top: 12px; margin-left: 30%; text-align: left;">
                     <span style="display: block; font-weight: bold">Momenteel beschikbaar:</span>
@@ -70,7 +77,7 @@
 
                     </span>
                 </span>
-            </p>
+            </div>
         </form>
 
         <div class="roulettes_container" style="background-color: #EEE; padding: 6px;">
@@ -87,5 +94,5 @@
             </a>
         </p>
     </div>
-
 </div>
+</body>

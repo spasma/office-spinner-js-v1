@@ -26,13 +26,11 @@ var rouletteInfoObj = null;
 var texts = {};
 var debugObj;
 var posla = null, poslo = null; // Voor eventuele future use (Vraag iedereen binnen de straal van een x aantal meter)
-
+var availableVoices = new Array();
 var lastCheckFired = 0;
 
 function startRequest() {
-
-   check();
-
+    check();
     timerId = window.setTimeout(startRequest, pollInterval);
 }
 
@@ -46,15 +44,15 @@ function getLocalStorageObj(name) {
 }
 
 function check() {
-    if (lastCheckFired < ((Date.now()/1000) - 5)) {
-        lastCheckFired = Date.now()/1000;
+    if (lastCheckFired < ((Date.now() / 1000) - 5)) {
+        lastCheckFired = Date.now() / 1000;
     } else {
         console.log("Overflow aan requests tegengegaan!");
         return;
     }
 
     var userObj = getLocalStorageObj('data');
-    var pos = function(position) {
+    var pos = function (position) {
         posla = position.coords.latitude;
         poslo = position.coords.longitude;
     };
@@ -94,8 +92,6 @@ function check() {
                 rouletteInfoObj.lasttime = new Date().getDate();
 
 
-
-
                 if (rouletteObj.loser.length && rouletteInfoObj[roulette_id]['local'].initialNotification == true) {
 
                     if (rouletteInfoObj[roulette_id]['local'].loserNotification == false && rouletteObj.loser[0].spinner != data.name && rouletteObj.reaction == 1) {
@@ -128,7 +124,8 @@ function check() {
                                 if (buttonIndex === 0) {
                                     chrome.tts.speak(texts[lNotification][0], {
                                         'lang': 'nl-NL',
-                                        rate: 1
+                                        rate: 1,
+                                        //voice: availableVoices[availableVoices.length-1]
                                     });
                                     chrome.notifications.clear(lNotification, function () {
                                     });
@@ -205,7 +202,7 @@ function check() {
                             // A MINUTE
 
 
-                            var aMinNotificationId = "min"+roulette_id;
+                            var aMinNotificationId = "min" + roulette_id;
                             chrome.notifications.create(
                                 aMinNotificationId, {
                                     type: "basic",
@@ -232,6 +229,7 @@ function check() {
 
 
                             chrome.notifications.onButtonClicked.addListener(function (aMinNotificationId, buttonIndex) {
+
                                 if (buttonIndex === 0) {
                                     chrome.tts.speak("Ja, ik ook.", {
                                         'lang': 'nl-NL',
@@ -251,6 +249,7 @@ function check() {
                                         'lang': 'nl-NL',
                                         rate: 1
                                     });
+
                                     $.post('http://kantoorroulette.nl/api/response', {
                                         roulette_id: roulette_id,
                                         reaction: "2"
@@ -269,10 +268,6 @@ function check() {
                             // END A MINUTE
                         }
                     }
-
-
-
-
 
 
                     rouletteInfoObj[roulette_id]['local'].active = true;
@@ -311,11 +306,13 @@ function check() {
                                 'lang': 'nl-NL',
                                 rate: 1
                             });
-                            $.post('http://kantoorroulette.nl/api/response', {
-                                roulette_id: roulette_id,
-                                reaction: "1"
-                            }, function (data) {
-                            });
+
+                            if (!rouletteObj.loser.length)
+                                $.post('http://kantoorroulette.nl/api/response', {
+                                    roulette_id: roulette_id,
+                                    reaction: "1"
+                                }, function (data) {
+                                });
 
                             chrome.notifications.clear(notificationId, function () {
                             });
@@ -325,12 +322,13 @@ function check() {
                                 'lang': 'nl-NL',
                                 rate: 1
                             });
-                            $.post('http://kantoorroulette.nl/api/response', {
-                                roulette_id: roulette_id,
-                                reaction: "2"
-                            }, function (data) {
+                            if (!rouletteObj.loser.length)
+                                $.post('http://kantoorroulette.nl/api/response', {
+                                    roulette_id: roulette_id,
+                                    reaction: "2"
+                                }, function (data) {
 
-                            });
+                                });
 
 
                             chrome.notifications.clear(notificationId, function () {
@@ -355,9 +353,9 @@ function check() {
                         var afhakersText = "";
                         if (aantalAfhakers > 0) {
                             if (aantalAfhakers == 1) {
-                                afhakersText = "De afhaker is "+afhakers[0];
+                                afhakersText = "De afhaker is " + afhakers[0];
                             } else {
-                                afhakersText = "De afhaker zijn "+afhakers.join(",");
+                                afhakersText = "De afhaker zijn " + afhakers.join(",");
                             }
                         }
 
@@ -366,11 +364,11 @@ function check() {
                                 type: "basic",
                                 iconUrl: "icons/icon48.png",
                                 title: "Kantoor Roulette!",
-                                message: "De aanvraag is verlopen, er zijn "+aantalDeelnemers+" deelnemers die ook " + rouletteObj.item + " willen. "+afhakersText,
+                                message: "De aanvraag is verlopen, er zijn " + aantalDeelnemers + " deelnemers die ook " + rouletteObj.item + " willen. " + afhakersText,
                                 priority: 9
                             }
                         );
-                        chrome.tts.speak("De aanvraag is verlopen, er zijn "+aantalDeelnemers+" deelnemers die ook " + rouletteObj.item + " willen. "+afhakersText, {
+                        chrome.tts.speak("De aanvraag is verlopen, er zijn " + aantalDeelnemers + " deelnemers die ook " + rouletteObj.item + " willen. " + afhakersText, {
                             'lang': 'nl-NL',
                             rate: 1
                         });
@@ -384,7 +382,7 @@ function check() {
                                 type: "basic",
                                 iconUrl: "icons/icon48.png",
                                 title: "Kantoor Roulette!",
-                                message: rouletteObj.spinning[0].spinner+" heeft zojuist de roulette gestart.",
+                                message: rouletteObj.spinning[0].spinner + " heeft zojuist de roulette gestart.",
                                 priority: 9
                             }
                         );
@@ -398,3 +396,11 @@ function check() {
 }
 
 startRequest();
+
+chrome.tts.getVoices(
+    function (voices) {
+        for (var i = 0; i < voices.length; i++) {
+            if (voices[i].lang == 'nl' || voices[i].lang == 'nl-NL')
+                availableVoices.push(voices[i]);
+        }
+    });
