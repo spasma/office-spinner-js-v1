@@ -53,8 +53,7 @@ var defaultSettings = {
 function updateData(data) {
     if (!data) {
         data = getLocalStorageObj('data');
-        dataToSend = {api_key: (data && data.api_key) ? data.api_key : "none"};
-        jQuery.getJSON('https://kantoorroulette.nl/apiv2/rouletteserver', dataToSend, function (data) {
+        jQuery.getJSON('https://kantoorroulette.nl/apiv2/rouletteserver', {api_key: (data && data.api_key) ? data.api_key : "none"}, function (data) {
             setLocalStorage('data', data);
             updateData(data);
         });
@@ -78,7 +77,7 @@ function storageEventHandler(evt) {
                 if (settings.balance>=0.25) {
                     addChatMessage({
                         type: 'gamble_success',
-                        message: 'Je doet mee met de Gulden Gamble met 0.25NLG!',
+                        message: 'Je doet mee met de Gulden Gamble!',
                         time: AddZero(new Date().getHours()) + ":" + AddZero(new Date().getMinutes())
                     });
                     partObj.gamble = 1;
@@ -196,7 +195,7 @@ if (!getLocalStorageObj('pos'))
 setLocalStorage('changeParticipation', []);
 setLocalStorage('chatRecQueue', []);
 setLocalStorage('newRouletteRequest', []);
-setLocalStorage('participants', []);
+setLocalStorage('participants', []); // Oude manier van mensen tonen .. is nu people_v2, kan weg
 setLocalStorage('people_v2', []);
 setLocalStorage('request_response', []);
 setLocalStorage('current_roulette', []);
@@ -348,7 +347,6 @@ function checkSocket() {
         // });
         socket.on('update-server-info', function (obj) {
             setLocalStorage('roulettes', obj.roulettes);
-            setLocalStorage('participants', obj.people);
             setLocalStorage('people_v2', obj.people_v2);
 
         });

@@ -27,16 +27,6 @@ function strip_tags(input, allowed) {
         });
 }
 
-window.addEventListener('storage', storageEventHandlerWindow, false);
-function storageEventHandlerWindow(evt) {
-    if (evt.key == "settings") {
-        settings = getLocalStorageObj('settings');
-        if (settings.balance) {
-            $('.balance').css('margin-left', '6px').html('(Saldo: '+settings.balance.toFixed(2)+' NLG)');
-        }
-    }
-}
-
 function createMessageHtml(obj) {
     text = "";
     if (obj.type == 'chat')
@@ -54,11 +44,24 @@ function createMessageHtml(obj) {
 
     return '<div class="row collapse"><div class="small-12">' + wdtEmojiBundle.render(text) + '</div></div>';
 }
+function updateTime() {
+    var uur = new Date().getHours();
+    var tijdsstipText = "";
+    if (uur >= 18)
+        tijdsstipText = 'Goedenavond';
+    else if (uur >= 12)
+        tijdsstipText = 'Goedemiddag';
+    else if (uur >= 6)
+        tijdsstipText = 'Goedemorgen';
+    else
+        tijdsstipText = 'Goedenacht';
 
+    $("span.dagWens").html(tijdsstipText);
+}
 function updateData(data) {
     if (!data) {
         data = getLocalStorageObj('data');
-        jQuery.getJSON('https://kantoorroulette.nl/apiv2/rouletteserver', dataToSend, function (data) {
+        jQuery.getJSON('https://kantoorroulette.nl/apiv2/rouletteserver', {api_key: (data && data.api_key) ? data.api_key : "none"}, function (data) {
             setLocalStorage('data', data);
             updateData(data);
         });
@@ -71,23 +74,12 @@ function updateData(data) {
         $('.login').hide();
         updateParticipants();
 
-        var uur = new Date().getHours();
-        var tijdsstipText = "";
-        if (uur >= 18)
-            tijdsstipText = 'Goedenavond';
-        else if (uur >= 12)
-            tijdsstipText = 'Goedemiddag';
-        else if (uur >= 6)
-            tijdsstipText = 'Goedemorgen';
-        else
-            tijdsstipText = 'Goedenacht';
-
-        $("span.dagWens").html(tijdsstipText);
+        updateTime();
         $("span.name").html(data.name);
         if (data.balance !== undefined) {
             gamble = true;
             $('.gamble').show();
-            $('.balance').css('margin-left', '6px').html('(Saldo: '+data.balance.toFixed(2)+' NLG)');
+            $('.balance').css('margin-left', '6px').html('(Saldo: <a target="_blank" href="https://kantoorroulette.nl/account/gulden"><i class="guldensign"></i>'+data.balance.toFixed(2)+'</a>)');
             settings = getLocalStorageObj('settings');
             settings.balance = data.balance;
             setLocalStorage('settings', settings);
@@ -107,6 +99,24 @@ function updateData(data) {
         $('.loggedin').fadeIn(100);
     }
     $('.load').hide();
+}
+
+function updateGambleData(data) {
+    if (!data) {
+        data = getLocalStorageObj('data');
+        jQuery.getJSON('https://kantoorroulette.nl/apiv2/rouletteserver', {api_key: (data && data.api_key) ? data.api_key : "none"}, function (data) {
+            setLocalStorage('data', data);
+            updateGambleData(data);
+        });
+    } else if (data.user_id) {
+        if (data.balance !== undefined) {
+            gamble = true;
+            settings = getLocalStorageObj('settings');
+            settings.balance = data.balance;
+            setLocalStorage('settings', settings);
+        }
+        updateTime();
+    }
 }
 
 function AddZero(num) {
@@ -248,7 +258,7 @@ $(function () {
     $messageContainer = $(".messages-container")[0];
     data = getLocalStorageObj('data');
 //  ====================  LOGIN Functions 
-    dataToSend = {api_key: (data && data.api_key) ? data.api_key : "none"};
+    dataToSend = {api_key: (data && data.api_key) ? data.api_key : "none"}; // XX SP: Dit kan weg? wordt niet gebruikt..
 
     updateData(false);
 
@@ -510,8 +520,6 @@ function storageEventHandler(evt) {
     } else if (evt.key == "current_roulette") {
         currentRoulette();
         updateParticipants();
-    } else if (evt.key == "participants") {
-        updateParticipants();
     } else if (evt.key == "people_v2") {
         updateParticipants();
     } else if (evt.key == "init_spinner_data") {
@@ -522,6 +530,11 @@ function storageEventHandler(evt) {
             processInitRoulette();
         checkSpinnerActive();
         updateSpinPos();
+    } else if (evt.key == "settings") {
+        settings = getLocalStorageObj('settings');
+        if (settings.balance) {
+            $('.balance').css('margin-left', '6px').html('(Saldo: '+settings.balance.toFixed(2)+' NLG)');
+        }
     }
 }
 
@@ -530,8 +543,10 @@ function checkSpinnerActive() {
         clearTimeout(spinnerShowTimeout);
     }
     spinnerShowTimeout = setTimeout(function () {
-        $('.spinner:visible').slideUp(1000);
-    }, 7000);
+        $('.spinner:visible').slideUp(1000, function() {
+
+        });
+    }, 10000);
 
     $('.spinner:hidden').slideDown(1000);
 }
