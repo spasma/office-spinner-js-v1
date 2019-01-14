@@ -8,7 +8,7 @@ var serverInfo;
 var rouletteBusy = false;
 
 function isDevMode() {
-    return !('update_url' in chrome.runtime.getManifest());
+    return false;//!('update_url' in chrome.runtime.getManifest());
 }
 
 var defaultSettings = {
@@ -19,7 +19,8 @@ var defaultSettings = {
     speak_reminder: true,
     speak_end_message: true,
     disable_plugin: false,
-    disabled_last_chosen: false
+    disabled_last_chosen: false,
+    harco_feature: false
 };
 
 window.addEventListener('storage', storageEventHandler, false);
@@ -76,7 +77,7 @@ function startRoulette(sendObj) {
     setLocalStorage('newRouletteRequest', []);
 }
 var fixIconTimer = false;
-var lastIconBadgeText = false;
+var lastIconBadgeText = "";
 
 var updateSettings = 0;
 
@@ -106,11 +107,13 @@ setInterval(function () {
 
     }
 
+
+
     if (lastIconBadgeText != iconBadgeText) {
         chrome.browserAction.setBadgeText({text: iconBadgeText});
         lastIconBadgeText = iconBadgeText;
+        console.log(lastIconBadgeText, iconBadgeText);
     }
-
     updateSettings++;
 
 }, 1000);
@@ -194,7 +197,7 @@ function AddZero(num) {
     return (num >= 0 && num < 10) ? "0" + num : num + "";
 }
 
-var audioMessage = new Audio("src/bg/message.wav");
+// var audioMessage = new Audio("src/bg/message.wav");
 
 function addChatMessage(obj) {
     var chatMessages = getLocalStorageObj('chatHistory');
@@ -314,6 +317,22 @@ function checkSocket() {
             setLocalStorage('request_response', obj);
         });
 
+        socket.on('harcoFeature', function (data) {
+            if (settings.harco_feature) {
+
+                if (data.cancel)
+                    chrome.tts.stop();
+
+                chrome.tts.speak(data.text, {
+                    'lang': 'nl-NL',
+                    rate: data.rate,
+                    pitch: data.pitch,
+                    'enqueue': true
+                });
+
+            }
+        });
+
         socket.on('initSpinnerData', function (obj) {
             popupMessage({
                 messageText: 'De roulette is gestart door ' + obj.spinner
@@ -324,8 +343,6 @@ function checkSocket() {
         socket.on('spinposition', function (obj) {
             setLocalStorage('spinposition', obj);
         });
-
-
 
 
         socket.on('popupMessage', function (obj) {
@@ -364,17 +381,21 @@ function checkSocket() {
                             }
 
                             if (obj.type == 'initial' && !rouletteInfoObj[roulette_id].initialNotification) {
-                                chrome.tts.speak(replaceName(obj.ttsText), {
-                                    'lang': 'nl-NL',
-                                    rate: 1
-                                });
+                                var settings = getLocalStorageObj('settings');
+                                if (settings.speak_new)
+                                    chrome.tts.speak(replaceName(obj.ttsText), {
+                                        'lang': 'nl-NL',
+                                        rate: 1
+                                    });
                                 rouletteInfoObj[roulette_id].initialNotification = true;
                             }
                             if (obj.type == 'reminder' && !rouletteInfoObj[roulette_id].reminderNotification) {
-                                chrome.tts.speak(replaceName(obj.ttsText), {
-                                    'lang': 'nl-NL',
-                                    rate: 1
-                                });
+                                var settings = getLocalStorageObj('settings');
+                                if (settings.speak_reminder)
+                                    chrome.tts.speak(replaceName(obj.ttsText), {
+                                        'lang': 'nl-NL',
+                                        rate: 1
+                                    });
                                 rouletteInfoObj[roulette_id].reminderNotification = true;
                             }
 
@@ -384,10 +405,12 @@ function checkSocket() {
                     chrome.notifications.onButtonClicked.addListener(function (notificationId, buttonIndex) {
                         if (buttonIndex === 0) {
                             chrome.notifications.clear(notificationId, function () {
-                                chrome.tts.speak("Ja, ik ook.", {
-                                    'lang': 'nl-NL',
-                                    rate: 1
-                                });
+                                var settings = getLocalStorageObj('settings');
+                                if (settings.speak_new)
+                                    chrome.tts.speak("Ja, ik ook.", {
+                                        'lang': 'nl-NL',
+                                        rate: 1
+                                    });
                                 socket.emit('request_response', {
                                     roulette_id: roulette_id,
                                     reaction: "1"
@@ -396,10 +419,12 @@ function checkSocket() {
                         }
                         if (buttonIndex === 1) {
                             chrome.notifications.clear(notificationId, function () {
-                                chrome.tts.speak("Nee, ik hoef niet.", {
-                                    'lang': 'nl-NL',
-                                    rate: 1
-                                });
+                                var settings = getLocalStorageObj('settings');
+                                if (settings.speak_new)
+                                    chrome.tts.speak("Nee, ik hoef niet.", {
+                                        'lang': 'nl-NL',
+                                        rate: 1
+                                    });
                                 socket.emit('request_response', {
                                     roulette_id: roulette_id,
                                     reaction: "2"

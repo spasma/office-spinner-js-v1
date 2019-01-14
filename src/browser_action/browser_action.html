@@ -24,20 +24,19 @@
             <div class="row logo collapse">
                 <span class="settings-toggle-container">
                     <a class="disable_coffee" data-toggle="DND"><i class="fa fa-bell"></i></a>
-                    <!--<a href="#" class="settings-toggle"><i class="fa fa-cog"></i></a>-->
+                    <a href="#" class="settings-toggle"><i class="fa fa-cog"></i></a>
                 </span>
-                <div class="dropdown-pane small" id="DND" data-dropdown data-hover="true"
-                    data-hover-pane="true">
+                <div class="dropdown-pane small" id="DND" data-dropdown data-hover="true" data-hover-pane="true">
                     <div class="text-center" style="margin-bottom: 12px;"><strong>Niet storen</strong></div>
                     <div class="remaining"></div>
                     <ul class="menu vertical dnd-menu">
-                    <li class="active"><a data-time="0">Uit</a></li>
-                    <li><a data-time="600">10 minuten</a></li>
-                    <li><a data-time="900">15 minuten</a></li>
-                    <li><a data-time="1800">30 minuten</a></li>
-                    <li><a data-time="3600">1 uur</a></li>
-                    <li><a data-time="43200">12 uur</a></li>
-                    <li><a data-time="today">Rest van de dag</a></li>
+                        <li class="active"><a data-time="0">Uit</a></li>
+                        <li><a data-time="600">10 minuten</a></li>
+                        <li><a data-time="900">15 minuten</a></li>
+                        <li><a data-time="1800">30 minuten</a></li>
+                        <li><a data-time="3600">1 uur</a></li>
+                        <li><a data-time="43200">12 uur</a></li>
+                        <li><a data-time="today">Rest van de dag</a></li>
                     </ul>
                 </div>
                 <div class="large-12 medium-12 small-12 columns logo">
@@ -71,18 +70,18 @@
             <div class="callout warning">
                 <i class="fa-info-circle fa"></i> Beschikbaar in de volgende versie
             </div>
-            <div class="row">
-                <div class="large-6 medium-12 small-12 columns text-center ">
-                    <h2><i class="fa fa-bell-o"></i> Meldingen</h2>
-                </div>
-            </div>
-            <div class="row">
-                <div class="small-10 small-offset-2 columns">
-                    <label> <input disabled type="checkbox" data-setting="notification_new"> Melding bij nieuwe
-                        verzoeken </label> <label> <input disabled type="checkbox" data-setting="notification_reminder">
-                    "Laatste minuut om mee te doen" Melding </label>
-                </div>
-            </div>
+            <!--<div class="row">-->
+                <!--<div class="large-6 medium-12 small-12 columns text-center ">-->
+                    <!--<h2><i class="fa fa-bell-o"></i> Meldingen</h2>-->
+                <!--</div>-->
+            <!--</div>-->
+            <!--<div class="row">-->
+                <!--<div class="small-10 small-offset-2 columns">-->
+                    <!--<label> <input disabled type="checkbox" data-setting="notification_new"> Melding bij nieuwe-->
+                        <!--verzoeken </label> <label> <input disabled type="checkbox" data-setting="notification_reminder">-->
+                    <!--"Laatste minuut om mee te doen" Melding </label>-->
+                <!--</div>-->
+            <!--</div>-->
             <div class="row">
                 <div class="large-6 medium-12 small-12 columns text-center ">
                     <h2><i class="fa fa-volume-up"></i> Geluid</h2>
@@ -90,9 +89,19 @@
             </div>
             <div class="row">
                 <div class="small-10 small-offset-2 columns">
-                    <label> <input disabled type="checkbox" data-setting="speak_new"> Spreek nieuwe verzoeken uit
-                    </label> <label> <input disabled type="checkbox" data-setting="speak_reminder"> "Laatste minuut om
+                    <label> <input type="checkbox" data-setting="speak_new"> Spreek nieuwe verzoeken uit
+                    </label> <label> <input type="checkbox" data-setting="speak_reminder"> "Laatste minuut om
                     mee te doen" uitspreken </label>
+                </div>
+            </div>
+            <div class="row">
+                <div class="large-6 medium-12 small-12 columns text-center ">
+                    <h2><i class="fa fa-star"></i> Speciale Features</h2>
+                </div>
+            </div>
+            <div class="row">
+                <div class="small-10 small-offset-2 columns">
+                    <label> <input type="checkbox" data-setting="harco_feature"> Harco Feature <i class="fa fa-question-circle" title="Spreek de roulette-berichten uit als deze gedraaid wordt door iemand anders." data-tooltip></i></label>
                 </div>
             </div>
         </div>
@@ -114,8 +123,8 @@
                         <div class="start_roulette">
                             <div class="row i_want_coffee_toggle_container">
                                 <div class="large-12 medium-12 small-12 text-center">
-                                    <a class="i_want_coffee_toggle button small"> <i class="fa fa-coffee"></i> Ik wil
-                                        graag koffie! </a>
+                                    <a class="i_want_coffee_toggle button"> <i class="fa fa-coffee"></i> Ik wil graag
+                                        koffie! </a>
                                 </div>
                             </div>
                             <div class="row i_want_coffee_confirm" style="display: none;">
@@ -138,8 +147,8 @@
                                     </div>
                                 </div>
                                 <div class="large-12 medium-12 small-12 columns text-center confirm-buttons-container confirm_buttons">
-                                    <a class="i_want_coffee_start button small"> <i class="fa fa-coffee"></i> Ja,
-                                        verstuur uitnodiging! </a> <a class="i_want_coffee_close button small"> <i
+                                    <a class="i_want_coffee_start button"> <i class="fa fa-coffee"></i> Ja, verstuur
+                                        uitnodiging! </a> <a class="i_want_coffee_close button"> <i
                                         class="fa fa-times"></i> <span>Nee</span> </a>
                                 </div>
                                 <div class="large-12 medium-12 small-12 columns text-center advancedLink">
@@ -167,9 +176,12 @@
             <div class="row chat columns">
                 <span>Chat</span>
                 <div class="messages-container"></div>
-                <div>
-                    <input type="text" class="newMessage form-control" placeholder="Typ een chatbericht.."/>
+                <div class="small-12">
+                    <input type="text" class="newMessage form-control wdt-emoji-bundle-enabled" placeholder="Typ een chatbericht.."/>
                 </div>
+                <!--<div class="small-1 columns">-->
+                    <!--<a class="emoji">:)</a>-->
+                <!--</div>-->
             </div>
         </div>
         <div class="load text-center row" style="height: 200px;">
@@ -197,10 +209,10 @@
         </div>
         <div class="wdt-emoji-scroll-wrapper">
             <div id="wdt-emoji-menu-items">
-                <input id="wdt-emoji-search" type="text" placeholder="Search">
-                <h3 id="wdt-emoji-search-result-title">Search Results</h3>
+                <input id="wdt-emoji-search" type="text" placeholder="Zoeken">
+                <h3 id="wdt-emoji-search-result-title">Zoek Resultaat</h3>
                 <div class="wdt-emoji-sections"></div>
-                <div id="wdt-emoji-no-result">No emoji found</div>
+                <div id="wdt-emoji-no-result">Geen emoji gevonden</div>
             </div>
         </div>
         <div id="wdt-emoji-footer">
@@ -211,7 +223,7 @@
                 </div>
             </div>
             <div id="wdt-emoji-preview-bundle">
-                <span>WDT Emoji Bundle</span>
+                <span></span>
             </div>
         </div>
     </div>

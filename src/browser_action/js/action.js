@@ -79,9 +79,9 @@ function updateData() {
         var chatMessagesObj = getLocalStorageObj('chatHistory');
         var chatMessages = [];
         if (chatMessagesObj !== null)
-        $.each(chatMessagesObj, function (id, obj) {
-            chatMessages.push(createMessageHtml(obj));
-        });
+            $.each(chatMessagesObj, function (id, obj) {
+                chatMessages.push(createMessageHtml(obj));
+            });
 
         $('.messages-container').html("").append(chatMessages.join("")).scrollTop($messageContainer.scrollHeight);
         $('.loggedin').fadeIn(100);
@@ -104,7 +104,7 @@ function updateRoulettes() {
             if (date.getDate() == new Date().getDate()) {
                 if ($('[data-row-roulette="' + roulette.roulette_id + '"]').length) {
                     rouletteContent(roulette);
-                    //$('[data-row-roulette="' + roulette.roulette_id + '"] .content').html(newContent);
+                    // $('[data-row-roulette="' + roulette.roulette_id + '"] .content').html(newContent);
                 } else {
                     $('.roulettes').prepend("<div class='row' data-row-roulette='" + roulette.roulette_id + "'>" +
                         "<div class='large-12 medium-12 small-12 columns'>" +
@@ -136,7 +136,11 @@ function rouletteContent(roulette) {
     if ($('[data-row-roulette="' + roulette.roulette_id + '"]').length) {
         $('[data-row-roulette="' + roulette.roulette_id + '"] .participants').html(partHtml);
         if (roulette.loser) {
-            $('[data-row-roulette="' + roulette.roulette_id + '"] .losers').html(roulette.loser + ' was de verliezer' + '<form><input type="text" value="Hallo" /></form>').css({color: 'red'});
+            var loserNameEl = $('[data-row-roulette="' + roulette.roulette_id + '"] .losers .name').html();
+            if (loserNameEl !== roulette.loser + ' was de verliezer') {
+                $('[data-row-roulette="' + roulette.roulette_id + '"] .losers .name').html(roulette.loser + ' was de verliezer').css({color: 'red'});
+                // $('[data-row-roulette="' + roulette.roulette_id + '"] .losers .message').html('<form><div class="row"><div class="small-9 columns"><input type="text" value="" placeholder="Typ een troostbericht naar '+roulette.loser+'" /></div><div class="small-3 columns"><input type="button" class="button" value="Verstuur"></div></div></form>');
+            }
             $('[data-row-roulette="' + roulette.roulette_id + '"] .spin_roulette').hide();
         } else
             $('[data-row-roulette="' + roulette.roulette_id + '"] .losers').html('Nog geen verliezer bepaald');
@@ -146,7 +150,7 @@ function rouletteContent(roulette) {
 
     return "" +
         "<div class='roulette_participants roulette_" + roulette.roulette_id + "' data-roulette='" + roulette.roulette_id + "' style='display: none;'>" +
-        "<div class='losers text-center' style='padding: 0px 12px 12px 12px; font-size: 12px;'>" + (roulette.loser ? roulette.loser + ' was de verliezer' : '') + "</div> " +
+        "<div class='losers text-center' style='padding: 0px 12px 12px 12px; font-size: 12px;'><div class='name'></div><div class='message'></div></div> " +
         "<div class='spin text-center'><a class='button spin_roulette' data-roulette='" + roulette.roulette_id + "' data-spincode='" + roulette.spin_code + "' style='width: 100%;'>Spin deze roulette</a></div>" +
         "<div class='participants'>" + partHtml + "</div>" +
         "</div>";
@@ -177,8 +181,10 @@ function countDownDisabled() {
 
     if (secondsLeft > 0) {
         console.log(secondsLeft);
-        $("#DND .remaining").html("nog "+secondsLeft+" seconden.");
-        disabledCd = setTimeout(function() { countDownDisabled(); },1000);
+        $("#DND .remaining").html("nog " + secondsLeft + " seconden.");
+        disabledCd = setTimeout(function () {
+            countDownDisabled();
+        }, 1000);
     } else {
         $("#DND .remaining").html("")
         settings.disable_plugin = false
@@ -190,7 +196,7 @@ function countDownDisabled() {
 $(function () {
 
     var posCb = function (position) {
-        var pos = 'la='+position.coords.latitude+'&lo='+position.coords.longitude; // TODO SP: Wordt niks mee gedaan, voor toekomstige positiegebasseerde roulette server
+        var pos = 'la=' + position.coords.latitude + '&lo=' + position.coords.longitude; // TODO SP: Wordt niks mee gedaan, voor toekomstige positiegebasseerde roulette server
         setLocalStorage('pos', pos);
     };
     navigator.geolocation.getCurrentPosition(posCb);
@@ -213,6 +219,16 @@ $(function () {
         var newURL = "http://kantoorroulette.nl/fb/";
         chrome.tabs.create({url: newURL});
     });
+    $('.emoji').html(wdtEmojiBundle.render(':)'));
+    $('.emoji').click(function() {
+        $('.wdt-emoji-popup').css({
+            opacity: 1,
+            visibility: 'visible',
+            bottom: 12,
+            top: 'initial',
+            width: '100%'
+        })
+    })
 
     $('.googleConnect').click(function () {
         var newURL = "http://kantoorroulette.nl/goog/";
@@ -242,14 +258,14 @@ $(function () {
     //     setLocalStorage('settings', settings);
     // });
 
-    $('.dnd-menu a').click(function() {
+    $('.dnd-menu a').click(function () {
         var settings = getLocalStorageObj('settings');
 
         // if (settings.disable_plugin !== false) {
         settings.disabled_last_chosen = $(this).data('time');
         if ($(this).data('time') == "today") {
             var d = new Date();
-            d.setHours(24,0,0,0);
+            d.setHours(24, 0, 0, 0);
             settings.disable_plugin = d;
             $('.disable_coffee .fa').addClass('fa-bell-slash').removeClass('fa-bell');
         } else if ($(this).data('time') == "0") {
@@ -270,7 +286,6 @@ $(function () {
     });
 
 
-
     var settings = getLocalStorageObj('settings');
     var now = new Date();
     if (settings.disable_plugin != false) {
@@ -280,9 +295,9 @@ $(function () {
         if (secondsLeft > 0) {
             countDownDisabled();
             $('.disable_coffee .fa').addClass('fa-bell-slash').removeClass('fa-bell');
-                $('.dnd-menu li').removeClass('active');
-            if ($('.dnd-menu a[data-time="'+settings.disabled_last_chosen+'"]').length) {
-                $('.dnd-menu a[data-time="'+settings.disabled_last_chosen+'"]').parent().addClass('active');
+            $('.dnd-menu li').removeClass('active');
+            if ($('.dnd-menu a[data-time="' + settings.disabled_last_chosen + '"]').length) {
+                $('.dnd-menu a[data-time="' + settings.disabled_last_chosen + '"]').parent().addClass('active');
             }
 
         } else {
@@ -507,7 +522,7 @@ function updateParticipants() {
             var date = false;
             if (object.disabled)
                 date = new Date(object.disabled);
-            participantHtml += "<span class='radius label' "+(object.disabled?"data-tooltip title='"+object.name+" wil tot "+(date.getHours()+":"+date.getMinutes())+" niet gestoord worden.'":"")+">" + object.name + (object.disabled?' <i class="fa fa-bell-slash"></i>': '') + "</span>";
+            participantHtml += "<span class='radius label' " + (object.disabled ? "data-tooltip title='" + object.name + " wil tot " + (date.getHours() + ":" + date.getMinutes()) + " niet gestoord worden.'" : "") + ">" + object.name + (object.disabled ? ' <i class="fa fa-bell-slash"></i>' : '') + "</span>";
         });
         if ($('.currently-available').html() != participantHtml) {
             $('.currently-available').html(participantHtml)
