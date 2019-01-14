@@ -136,6 +136,7 @@ function rouletteContent(roulette) {
             }
             $('[data-row-roulette="' + roulette.roulette_id + '"] .spin_roulette').hide();
         } else {
+            console.log(roulette);
             $('[data-row-roulette="' + roulette.roulette_id + '"] .losers').html('Nog geen verliezer bepaald');
             $('.i_want_coffee_toggle').css('opacity', '0.2').css('background-color', '#CCC').css('color', '#333');
         }

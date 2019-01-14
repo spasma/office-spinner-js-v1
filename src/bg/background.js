@@ -26,15 +26,10 @@ chrome.idle.onStateChanged.addListener(function(newstate) {
     var time = new Date();
     if (newstate == 'locked' || newstate == 'idle') {
         socket.emit('user_idle', {idle: true});
-        // socket.disconnect();
-        console.log(time.toISOString()+" "+"DISCONNECT because idle!");
     } else if (newstate == 'active' && lastState != 'active') {
         socket.emit('user_idle', {idle: false});
-        // socket.connect();
-        console.log(time.toISOString()+" "+"RECONNECT!");
     }
     lastState = newstate;
-    console.log(time.toISOString()+" "+newstate);
 });
 
 var defaultSettings = {
@@ -51,7 +46,6 @@ var defaultSettings = {
 
 
 function storageEventHandler(evt) {
-    console.log(evt.key);
     if (evt.key == "chatSentQueue") {
         processNewChatMessages();
     } else if (evt.key == "changeParticipation") {

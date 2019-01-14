@@ -89,7 +89,9 @@ header .logo {
     background-color: #2ab136;
 }
 .currently-available span.idle {
-    background-color: #fffce1;
+    background-color: #FFF;
+    color: #333;
+    border: 1px solid #CCC;
 }
 .currently-available span.disabled {
     background-color: #e3c3ae;
