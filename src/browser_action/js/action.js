@@ -214,7 +214,7 @@ $(function () {
         chrome.tabs.create({url: newURL});
     });
     $('.emoji').html(wdtEmojiBundle.render(':)'));
-    $('.emoji').click(function() {
+    $('.emoji').click(function () {
         $('.wdt-emoji-popup').css({
             opacity: 1,
             visibility: 'visible',
@@ -299,12 +299,12 @@ $(function () {
             $('.settings-container').slideDown(800);
             $('.chat').fadeOut(800);
             $('.roulettes').fadeTo(800, 0);
-            $('.loggedin').slideUp(800);
+            $('.loggedin, .spinner-container').slideUp(800);
         } else {
             $('.settings-container').slideUp(800);
             $('.chat').fadeIn(800);
             $('.roulettes').fadeTo(800, 1);
-            $('.loggedin').slideDown(800);
+            $('.loggedin, .spinner-container').slideDown(800);
 
             $(this).find('.fa').toggleClass('fa-cog fa-arrow-circle-left')
         }
@@ -349,10 +349,12 @@ $(function () {
     });
 
     $('.roulettes').on('click', '.open_roulette', function () {
-        if ($(this).data('roulette') != $('.roulette_participants:visible').data('roulette'))
+        if ($(this).data('roulette') != $('.roulette_participants:visible').data('roulette')) {
             $('.roulette_participants:visible').slideUp(200);
+            $('.roulette_' + $(this).data('roulette')).slideToggle(200);
+        }
 
-        $('.roulette_' + $(this).data('roulette')).slideToggle(200);
+
 
     });
     $('.roulettes, .current_roulette_container').on('click', '.spin_roulette', function () {
@@ -465,11 +467,16 @@ function storageEventHandler(evt) {
         requestResponse();
     } else if (evt.key == "current_roulette") {
         currentRoulette();
+        updateParticipants();
     } else if (evt.key == "participants") {
+        updateParticipants();
+    } else if (evt.key == "people_v2") {
         updateParticipants();
     } else if (evt.key == "init_spinner_data") {
         checkSpinnerActive();
         processInitRoulette();
+    } else if (evt.key == "roulettes") {
+        updateRoulettes();
     } else if (evt.key == "spinposition") {
         if (!rouletteSpinStarted)
             processInitRoulette();
@@ -482,7 +489,9 @@ function checkSpinnerActive() {
     if (spinnerShowTimeout) {
         clearTimeout(spinnerShowTimeout);
     }
-    spinnerShowTimeout = setTimeout(function() { $('.spinner:visible').slideUp(1000); }, 7000);
+    spinnerShowTimeout = setTimeout(function () {
+        $('.spinner:visible').slideUp(1000);
+    }, 7000);
 
     $('.spinner:hidden').slideDown(1000);
 }
@@ -517,13 +526,14 @@ var responseHtmlDone = {
 
 function updateParticipants() {
     participants = getLocalStorageObj('people_v2');
+    console.log(participants);
     var participantHtml = "";
     if (participants !== null) {
         $.each(participants, function (id, object) {
             var date = false;
             if (object.disabled)
                 date = new Date(object.disabled);
-            participantHtml += "<span class='radius label' " + (object.disabled ? "data-tooltip title='" + object.name + " wil tot " + (date.getHours() + ":" + date.getMinutes()) + " niet gestoord worden.'" : "") + ">" + object.name + (object.disabled ? ' <i class="fa fa-bell-slash"></i>' : '') + "</span>";
+            participantHtml += "<span class='radius " + (object.idle ? 'idle' : '') + " " + (object.disabled ? 'disabled' : '') + " label'>" + object.name + (object.disabled ? ' <span class="disabled status" data-tooltip title="' + object.name + ' wil tot ' + (date.getHours() + ':' + date.getMinutes()) + ' niet gestoord worden."></span>' : '') + (object.idle ? ' <span class="idle status" data-tooltip title="Deze gebruiker lijkt niet aanwezig te zijn."></span>' : '') + "</span>";
         });
         if ($('.currently-available').html() != participantHtml && participantHtml !== "") {
             $('.currently-available').html(participantHtml)

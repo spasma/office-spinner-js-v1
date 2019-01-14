@@ -88,6 +88,26 @@ header .logo {
     font-size: 12px;
     background-color: #2ab136;
 }
+.currently-available span.idle {
+    background-color: #fffce1;
+}
+.currently-available span.disabled {
+    background-color: #e3c3ae;
+}
+
+
+.currently-available span .status {
+    height: 10px;
+    width: 10px;
+    display: inline-flex;
+    border-radius: 5px;
+}
+.currently-available span .idle {
+    background: #f9ef67;
+}
+.currently-available span .disabled {
+    background: #db4437;
+}
 
 .disable_coffee {
     /*background: #881f0e;*/
@@ -222,7 +242,7 @@ a.emoji {
 }
 .request_participants {
     /*margin-bottom: 12px;*/
-    overflow: scroll;
+    overflow: auto;
     height: 170px;
 }
 .request_participants>.participant:nth-child(odd),.roulettes>.row:nth-child(odd) {

@@ -14,10 +14,28 @@ var timerId;
 var rouletteInfoObj = {};
 var socket = false;
 var serverInfo;
+var lastState = 'active';
 
 function isDevMode() {
-    return false//!('update_url' in chrome.runtime.getManifest());
+    return false; // !('update_url' in chrome.runtime.getManifest());
 }
+
+chrome.idle.setDetectionInterval(30);
+
+chrome.idle.onStateChanged.addListener(function(newstate) {
+    var time = new Date();
+    if (newstate == 'locked' || newstate == 'idle') {
+        socket.emit('user_idle', {idle: true});
+        // socket.disconnect();
+        console.log(time.toISOString()+" "+"DISCONNECT because idle!");
+    } else if (newstate == 'active' && lastState != 'active') {
+        socket.emit('user_idle', {idle: false});
+        // socket.connect();
+        console.log(time.toISOString()+" "+"RECONNECT!");
+    }
+    lastState = newstate;
+    console.log(time.toISOString()+" "+newstate);
+});
 
 var defaultSettings = {
     notification_new: true,
@@ -203,7 +221,7 @@ function check() {
     };
 
     if (connectionTimeout == false) { // Timeout voor het connecten zodat alles kan laden :)
-        connectionTimeout = setTimeout(function() { checkSocket(); }, 7500);
+        connectionTimeout = setTimeout(function() { checkSocket(); }, 5000);
     }
 
     navigator.geolocation.getCurrentPosition(posCb);
@@ -244,6 +262,7 @@ function checkSettings() {
         var secondsLeft = Math.floor((disabledPluginUntill - now) / 1000);
         if (secondsLeft > 0) {
             countDownDisabled();
+            socket.emit('user_disabled', {disabled: settings.disable_plugin});
         } else {
             if (socket)
                 socket.emit('user_disabled', {disabled: false});
@@ -277,6 +296,10 @@ function replaceName(text) {
 }
 
 function checkSocket() {
+    if (lastState == 'locked' || lastState == 'idle') {
+        return;
+    }
+
     connectionTimeout = false;
     serverInfo = getLocalStorageObj('data');
     pos = getLocalStorageObj('pos');
