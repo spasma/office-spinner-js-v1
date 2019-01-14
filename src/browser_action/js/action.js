@@ -150,8 +150,12 @@ function updateRoulettes() {
 function rouletteContent(roulette) {
     var partHtml = "";
     var date = new Date(roulette.date);
+    var numWant = 0;
     for (var user_id in roulette.participants) {
         partHtml = partHtml + "<div data-response='" + roulette.participants[user_id].response + "' class='row columns participant part_" + user_id + "'><div class='large-8 medium-8 small-8 columns name'>" + roulette.participants[user_id].name + "</div><div class='large-3 medium-3 small-3 columns response'>" + responseHtmlDone[roulette.participants[user_id].response] + "</div><div "+(gamble?'':'style="display: none;"')+" class='gamble columns small-1'>"+(roulette.loser?gambleHtmlDone[roulette.participants[user_id].gamble]:((user_id == myId && roulette.participants[user_id].response == 1)?gambleHtmlSelfAfter[roulette.participants[user_id].gamble]:gambleHtml[roulette.participants[user_id].gamble]))+"</div></div>";
+        if (roulette.participants[user_id].response == 1) {
+            numWant++;
+        }
     }
 
     if ($('[data-row-roulette="' + roulette.roulette_id + '"]').length) {
@@ -176,7 +180,9 @@ function rouletteContent(roulette) {
     return "" +
         "<div class='roulette_participants roulette_" + roulette.roulette_id + "' data-roulette='" + roulette.roulette_id + "' style='display: none;'>" +
         "<div class='losers text-center' style='padding-bottom: 4px; font-size: 12px;'><div class='name'></div><div class='message'></div></div> " +
-        "<div class='spin text-center'><a class='button spin_roulette' data-roulette='" + roulette.roulette_id + "' data-spincode='" + roulette.spin_code + "' style='width: 100%;'>Spin deze roulette</a></div>" +
+        "<div class='spin text-center'>" +
+        (numWant>1?"<a class='button spin_roulette' data-roulette='" + roulette.roulette_id + "' data-spincode='" + roulette.spin_code + "' style='width: 100%;'>Spin deze roulette</a>":"Er zijn niet genoeg deelnemers.. Dat wordt zelf halen "+roulette.initiator+"..") +
+        "</div>" +
         "<div class='participants'>" + partHtml + "</div>" +
         "</div>";
 }
@@ -653,7 +659,7 @@ function currentRoulette(noEffect) {
         }
 
         if (numWant == numParticipants) {
-            $('.request_spin').html("<a class='button spin_roulette' data-roulette='" + current_roulette.roulette.roulette_id + "' data-spincode='" + current_roulette.roulette.spin_code + "' style='width: 100%;'>Spin deze roulette</a>");
+                $('.request_spin').html("<a class='button spin_roulette' data-roulette='" + current_roulette.roulette.roulette_id + "' data-spincode='" + current_roulette.roulette.spin_code + "' style='width: 100%;'>Spin deze roulette</a>");
             $('.i_want_coffee_toggle').css('opacity', '0.2').css('background-color', '#CCC').css('color', '#333');
         } else {
             $('.request_spin').html("");

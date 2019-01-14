@@ -297,8 +297,8 @@ a.emoji {
 .roulettes .participants {
     border-bottom: 1px solid #EEE;
     /* margin-bottom: 12px; */
-    overflow: scroll;
-    height: 150px;
+    /*overflow: scroll;*/
+    /*height: 150px;*/
 }
 
 .roulettes {

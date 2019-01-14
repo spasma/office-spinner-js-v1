@@ -448,19 +448,11 @@ function checkSocket() {
                             }
                             if (obj.type == 'reminder' && !rouletteInfoObj[roulette_id].reminderNotification) {
                                 var settings = getLocalStorageObj('settings');
-                                if (settings.speak_reminder) {
-                                    var sendObj = {
+                                if (settings.speak_reminder)
+                                    chrome.tts.speak(replaceName(obj.ttsText), {
                                         'lang': 'nl-NL',
-                                        rate: 1,
-                                        gamble: false
-                                    };
-                                    if (settings.gamble) {
-                                        if (settings.balance >= 0.25) {
-                                            sendObj.gamble = 1;
-                                        }
-                                    }
-                                    chrome.tts.speak(replaceName(obj.ttsText), sendObj);
-                                }
+                                        rate: 1
+                                    });
                                 rouletteInfoObj[roulette_id].reminderNotification = true;
                             }
 
