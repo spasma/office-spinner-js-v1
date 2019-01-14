@@ -1,5 +1,3 @@
-var langName;
-
 const TWO_PI = Math.PI * 2;
 const HALF_PI = Math.PI * 0.5;
 // canvas settings
@@ -20,11 +18,9 @@ var ppm = 40, // pixels per meter
 
 var world;
 var loser;
-var loserSpeak;
 var wheel,
     arrow,
-    mouseBody,
-    mouseConstraint;
+    mouseBody;
 
 var arrowMaterial,
     pinMaterial,
@@ -32,20 +28,16 @@ var arrowMaterial,
 
 var wheelSpinning = false,
     wheelStopped = true;
-var ronde = 1;
 var particles = [];
 
 var statusLabel = document.getElementById('status_label');
 
 
-var autoDecrease = false;
 var startSpeed = 0;
-var keepSpeed = false;
 
 var started = false;
-var geluid = false;
 function startAll() {
-    if (started == true)
+    if (started === true)
         return;
     started = true;
     $(".ios").hide();
@@ -54,7 +46,6 @@ function startAll() {
     requestAnimationFrame(loop);
 
 }
-
 
 window.onload = function () {
     initDrawingCanvas();
@@ -139,25 +130,6 @@ function update() {
 
     world.step(timeStep * 0.5);
     world.step(timeStep * 0.5);
-
-    if (wheelSpinning === true && wheelStopped === false &&
-        (wheel.body.angularVelocity < 0.1) && arrow.hasStopped()) {
-
-        if (loser == "[special]") {
-            wheel.body.angularVelocity = (Math.random() * 100);
-            spawnPartices();
-        } else {
-            var win = wheel.gotLucky();
-            wheelStopped = true;
-            wheelSpinning = false;
-            wheel.body.angularVelocity = 0;
-            spawnPartices();
-            statusLabel.innerHTML = 'Ennnn ja hoorrrr, Het lot heeft bepaald!<br/><span id="loser"  style="font-size: 1.6em;">' + (drinkImage ? ' <img style="height: 50px;" src="' + drinkImage + '">' : '') + loser + '!' + (drinkImage ? '<img style="height: 50px;" src="' + drinkImage + '"><br/><a class="button" onclick="sayGezegde();">Vertel nog een gezegde of mopje</a>' : '<br/><a class="button" onclick="sayGezegde();">Vertel nog een gezegde of mopje</a>') + '</span>';
-            $('#uitslagen tbody').append('<tr><td>' + ronde + '</td><td>' + loser + '</td></tr>');
-            ronde++;
-            resizeName();
-        }
-    }
 }
 
 function draw() {
@@ -241,12 +213,6 @@ Wheel.prototype = {
         }
 
     },
-    gotLucky: function () {
-        var currentRotation = wheel.body.angle % TWO_PI,
-            currentSegment = Math.floor(currentRotation / this.deltaPI);
-
-        return (currentSegment % 2 === 0);
-    },
     draw: function () {
         ctx.save();
         ctx.translate(this.pX, this.pY);
@@ -279,7 +245,6 @@ Wheel.prototype = {
             currentSegment = Math.floor((currentRotation / this.deltaPI));
 
         loser = users2[(currentSegment - 5 >= 0) ? currentSegment - 5 : users2.length + (currentSegment - 5)];
-        loserSpeak = users3[(currentSegment - 5 >= 0) ? currentSegment - 5 : users3.length + (currentSegment - 5)];
         ctx.fillStyle = '#401911';
 
         this.pPinPositions.forEach(function (p) {
@@ -519,20 +484,4 @@ function colorName() {
 
 function confettiGekte() {
     spawnPartices();
-    if (wheelSpinning === true && wheelStopped === false) {
-        confettiGekte()
-    }
-
 }
-
-window.addEventListener("beforeunload", function (e) {
-    speechSynthesis.cancel();
-
-    if (voices[lang].lang.substr(0, 2) == "nl")
-        speak("doei hè", true, 1.5, normaal);
-    if (voices[lang].lang.substr(0, 2) == "de")
-        speak("tschüss", true, 1.5, normaal);
-    if (voices[lang].lang.substr(0, 2) == "en")
-        speak("bye", true, 1.5, normaal);
-
-}, false);

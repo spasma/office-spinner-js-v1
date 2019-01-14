@@ -2,7 +2,6 @@ var iwant_countdown, iwant_timer, data;
 var $currentInput, $inputMessage, $messageContainer;
 var typing = false;
 var participants;
-var socket;
 var myId;
 var gamble = false;
 $(function () {
@@ -13,6 +12,8 @@ $(function () {
     wdtEmojiBundle.init('.wdt-emoji-bundle-enabled');
     wdtEmojiBundle.changeType('apple');
 });
+var background = chrome.extension.getBackgroundPage();
+var socket = background.socket;
 
 function strip_tags(input, allowed) {
     allowed = (((allowed || '') + '')
@@ -44,6 +45,7 @@ function createMessageHtml(obj) {
 
     return '<div class="row collapse"><div class="small-12">' + wdtEmojiBundle.render(text) + '</div></div>';
 }
+
 function updateTime() {
     var uur = new Date().getHours();
     var tijdsstipText = "";
@@ -58,23 +60,60 @@ function updateTime() {
 
     $("span.dagWens").html(tijdsstipText);
 }
+
+var retryTimeout;
+var intervalSpinner;
+
 function updateData(data) {
-    if (!data) {
+    $('header').addClass('started');
+    var gettingData = false;
+    if (!getLocalStorageObj('connected') || !getLocalStorageObj('data')) {
+        gettingData = true;
         data = getLocalStorageObj('data');
         jQuery.getJSON('https://kantoorroulette.nl/apiv2/rouletteserver', {api_key: (data && data.api_key) ? data.api_key : "none"}, function (data) {
             setLocalStorage('data', data);
-            updateData(data);
+            if (data.api_key) {
+                background.checkSocket();
+            }
+
+            if (retryTimeout)
+                clearTimeout(retryTimeout);
+            retryTimeout = setTimeout(function () {
+                updateData(data);
+            }, 5000);
         });
     }
-    if (!data || !data.user_id) {
-        $('.login').show();
-        $('.loggedin').hide();
-    } else {
+
+    if (!getLocalStorageObj('connected') && !gettingData) {
+        $('header').addClass('logging-in');
+        if (!($('.login').is(':visible'))) {
+            $('.settings-toggle-container').removeClass('open');
+            $('.login').show();
+            users = ['Jij', 'Je collega', 'Je collega', 'Je collega', 'Je collega', 'Je collega', 'Je collega', 'Je collega', 'Je collega', 'Je collega', 'Je collega', 'Je collega', 'Je collega', 'Je collega', 'Je collega', 'Je collega', 'Je collega', 'Je collega', 'Je collega', 'Je collega', 'Je collega', 'Je collega'];
+            wheel.body.angularVelocity = 1;
+            intervalSpinner = setInterval(function () {
+                wheel.body.angularVelocity = 1;
+                if (Math.random() > 0.7) {
+                    spawnPartices();
+                }
+            }, 4000);
+            $('.spinner').css('padding-top', '90px').show();
+
+            $('.loggedin').removeClass('started');
+        }
+    } else if (!gettingData) {
+        if (intervalSpinner) {
+            $('.spinner').removeAttr('style').hide();
+            clearInterval(intervalSpinner);
+            $('header').removeClass('logging-in');
+        }
+        $('.settings-toggle-container').addClass('open');
+        data = getLocalStorageObj('data');
         myId = data.user_id;
         $('.login').hide();
         updateParticipants();
-
         updateTime();
+        updateGroups();
         $("span.name").html(data.name);
         if (data.balance !== undefined) {
             gamble = true;
@@ -83,7 +122,7 @@ function updateData(data) {
                 guldenRate = data.guldenRate;
             }
             $('.gamble').show();
-            $('.balance').css('margin-left', '6px').html('(Saldo: <a target="_blank" href="https://kantoorroulette.nl/account/gulden"><i class="guldensign"></i>'+data.balance.toFixed(2)+'</a>'+(guldenRate?'  ≈ &euro;'+(guldenRate*data.balance.toFixed(2)).toFixed(2).replace('.', ',')+'':'')+')');
+            $('.balance').css('margin-left', '6px').html('(Saldo: <a target="_blank" href="https://kantoorroulette.nl/account/gulden"><i class="guldensign"></i>' + data.balance.toFixed(2) + '</a>' + (guldenRate ? '  ≈ &euro;' + (guldenRate * data.balance.toFixed(2)).toFixed(2).replace('.', ',') + '' : '') + ')');
             settings = getLocalStorageObj('settings');
             settings.balance = data.balance;
             setLocalStorage('settings', settings);
@@ -91,16 +130,18 @@ function updateData(data) {
         updateRoulettes();
         currentRoulette(true);
         setLocalStorage('chatRecQueue', []);
-
         var chatMessagesObj = getLocalStorageObj('chatHistory');
         var chatMessages = [];
-        if (chatMessagesObj !== null)
+        if (chatMessagesObj !== null) {
             $.each(chatMessagesObj, function (id, obj) {
                 chatMessages.push(createMessageHtml(obj));
             });
+        }
+        $('.choose-group .available').html(Object.keys(getLocalStorageObj('groups')).length + " beschikbaar");
 
         $('.messages-container').html("").append(chatMessages.join("")).scrollTop($messageContainer.scrollHeight);
-        $('.loggedin').fadeIn(100);
+        $('.loggedin').addClass('started');
+        $('.helloUser, .chat').addClass('started');
     }
     $('.load').hide();
 }
@@ -126,6 +167,7 @@ function updateGambleData(data) {
 function AddZero(num) {
     return (num >= 0 && num < 10) ? "0" + num : num + "";
 }
+
 function updateRoulettes() {
     var roulettes = getLocalStorageObj('roulettes');
     //$('.roulettes').html("");
@@ -157,10 +199,18 @@ function updateRoulettes() {
 
         $('.changeGambleAfterYes').click(function () {
             console.log($(this).closest('[data-row-roulette]').data('row-roulette'));
-            setLocalStorage('changeParticipation', {reaction: false, gamble: 1, roulette_id: ($(this).closest('[data-row-roulette]').data('row-roulette'))});
+            setLocalStorage('changeParticipation', {
+                reaction: false,
+                gamble: 1,
+                roulette_id: ($(this).closest('[data-row-roulette]').data('row-roulette'))
+            });
         });
         $('.changeGambleAfterNo').click(function () {
-            setLocalStorage('changeParticipation', {reaction: false, gamble: 2, roulette_id: ($(this).closest('[data-row-roulette]').data('row-roulette'))});
+            setLocalStorage('changeParticipation', {
+                reaction: false,
+                gamble: 2,
+                roulette_id: ($(this).closest('[data-row-roulette]').data('row-roulette'))
+            });
         });
 
 
@@ -171,12 +221,13 @@ function updateRoulettes() {
         }
     }
 }
+
 function rouletteContent(roulette) {
     var partHtml = "";
     var date = new Date(roulette.date);
     var numWant = 0;
     for (var user_id in roulette.participants) {
-        partHtml = partHtml + "<div data-response='" + roulette.participants[user_id].response + "' class='row columns participant part_" + user_id + "'><div class='large-8 medium-8 small-8 columns name'>" + roulette.participants[user_id].name + "</div><div class='large-3 medium-3 small-3 columns response'>" + responseHtmlDone[roulette.participants[user_id].response] + "</div><div "+(gamble?'':'style="display: none;"')+" class='gamble columns small-1'>"+(roulette.loser?gambleHtmlDone[roulette.participants[user_id].gamble]:((user_id == myId && roulette.participants[user_id].response == 1)?gambleHtmlSelfAfter[roulette.participants[user_id].gamble]:gambleHtml[roulette.participants[user_id].gamble]))+"</div></div>";
+        partHtml = partHtml + "<div data-response='" + roulette.participants[user_id].response + "' class='row columns participant part_" + user_id + "'><div class='large-8 medium-8 small-8 columns name'>" + roulette.participants[user_id].name + "</div><div class='large-3 medium-3 small-3 columns response'>" + responseHtmlDone[roulette.participants[user_id].response] + "</div><div " + (gamble ? '' : 'style="display: none;"') + " class='gamble columns small-1'>" + (roulette.loser ? gambleHtmlDone[roulette.participants[user_id].gamble] : ((user_id == myId && roulette.participants[user_id].response == 1) ? gambleHtmlSelfAfter[roulette.participants[user_id].gamble] : gambleHtml[roulette.participants[user_id].gamble])) + "</div></div>";
         if (roulette.participants[user_id].response == 1) {
             numWant++;
         }
@@ -205,7 +256,7 @@ function rouletteContent(roulette) {
         "<div class='roulette_participants roulette_" + roulette.roulette_id + "' data-roulette='" + roulette.roulette_id + "' style='display: none;'>" +
         "<div class='losers text-center' style='padding-bottom: 4px; font-size: 12px;'><div class='name'></div><div class='message'></div></div> " +
         "<div class='spin text-center'>" +
-        (numWant>1?"<a class='button spin_roulette' data-roulette='" + roulette.roulette_id + "' data-spincode='" + roulette.spin_code + "' style='width: 100%;'>Spin deze roulette</a>":"Er zijn niet genoeg deelnemers.. Dat wordt zelf halen "+roulette.initiator+"..") +
+        (numWant > 1 ? "<a class='button spin_roulette' data-roulette='" + roulette.roulette_id + "' data-spincode='" + roulette.spin_code + "' style='width: 100%;'>Spin deze roulette</a>" : "Er zijn niet genoeg deelnemers.. Dat wordt zelf halen " + roulette.initiator + "..") +
         "</div>" +
         "<div class='participants'>" + partHtml + "</div>" +
         "</div>";
@@ -226,6 +277,7 @@ function resetDisabled() {
 
 var settings;
 var disabledCd = false;
+
 function countDownDisabled() {
     var settings = getLocalStorageObj('settings');
     if (disabledCd)
@@ -255,16 +307,16 @@ $(function () {
     };
     navigator.geolocation.getCurrentPosition(posCb);
 
-
-    $currentInput = $('.newMessage').focus();
     $inputMessage = $('.newMessage');
+    $currentInput = $('.newMessage').focus();
+
     setLocalStorage('request_response', {});
     $messageContainer = $(".messages-container")[0];
     data = getLocalStorageObj('data');
 //  ====================  LOGIN Functions 
     dataToSend = {api_key: (data && data.api_key) ? data.api_key : "none"}; // XX SP: Dit kan weg? wordt niet gebruikt..
 
-    updateData(false);
+    updateData();
 
     $('.facebookConnect').click(function () {
         var newURL = "https://kantoorroulette.nl/fb/";
@@ -347,23 +399,86 @@ $(function () {
         }
     }
 
+    $('.button-logout, .button-logout-no').click(function () {
+        $('.logout-sure').slideToggle(500);
+    });
+    $('.button-logout-yes').click(function () {
+        jQuery.get('https://kantoorroulette.nl/?uitloggen', function () {
+            setLocalStorage('changeParticipation', []);
+            setLocalStorage('chatRecQueue', []);
+            setLocalStorage('newRouletteRequest', []);
+            setLocalStorage('participants', []); // Oude manier van mensen tonen .. is nu online, kan weg
+            setLocalStorage('online', []);
+            setLocalStorage('request_response', []);
+            setLocalStorage('current_roulette', []);
+            setLocalStorage('roulettes', []);
+            setLocalStorage('init_spinner_data', []);
+            setLocalStorage('spinposition', []);
+            setLocalStorage('spinposition', false);
+            setLocalStorage('data', false);
+            setLocalStorage('connected', false);
+            socket.disconnect();
+            delete background.socket;
+            background.location.reload();
+            window.location.reload();
+        });
+
+    });
+    var groupsObj;
+    var groupNum = 0;
+
+
+    $('.choose-group').click(function () {
+        updateGroups();
+        if ($('.group-container').hasClass('started')) {
+            $('.chat').addClass('started');
+            $('.group-container').removeClass('started')
+        } else {
+            $('.chat').removeClass('started');
+            $('.group-container').addClass('started')
+        }
+    });
+    $('.toggle-new-group').click(function () {
+        $('.toggle-new-group').fadeOut(100);
+        $('.groups-container').fadeOut(100, function () {
+            $('.new-group').fadeIn(100);
+        })
+    });
+
+    $('.new-group-create').click(function () {
+        $('.new-group-alert:visible').slideDown(100);
+
+        if ($('#new_group_name').val().length === 0) {
+            $('.new-group-alert .alert-text').html("Er is geen naam opgegeven.");
+            $('.new-group-alert').slideDown(100);
+        } else {
+            socket.emit('newgroup', {group_name: $('#new_group_name').val()});
+        }
+    });
+
+
+    $('.new-group-cancel').click(function () {
+        closeNewGroup();
+    });
 
     $('.settings-toggle').click(function () {
-        updateSettingsWindow()
+        updateSettingsWindow();
 
-        if ($(this).find('.fa').hasClass('fa-cog')) {
-            $(this).find('.fa').toggleClass('fa-cog fa-arrow-circle-left')
-            $('.settings-container').slideDown(800);
-            $('.chat').fadeOut(800);
+        if ($(this).find('.settings-icon').hasClass('fa-cog')) {
+            $(this).find('.settings-icon').replaceWith('<i class="far fa-arrow-circle-left settings-icon"></i>'); //toggleClass('fa-cog fa-arrow-circle-left')
+            $('.settings-container').addClass('started');
+            $('.chat').removeClass('started');
             $('.roulettes').fadeTo(800, 0);
-            $('.loggedin, .spinner-container').slideUp(800);
+            $('.spinner-container').slideUp(800);
+            $('.loggedin').removeClass('started')
         } else {
-            $('.settings-container').slideUp(800);
-            $('.chat').fadeIn(800);
+            $('.settings-container').removeClass('started');
             $('.roulettes').fadeTo(800, 1);
-            $('.loggedin, .spinner-container').slideDown(800);
-
-            $(this).find('.fa').toggleClass('fa-cog fa-arrow-circle-left')
+            $('.spinner-container').show();
+            $('.loggedin').addClass('started')
+            $('.chat').addClass('started');
+            $(this).find('.settings-icon').replaceWith('<i class="far fa-cog settings-icon"></i>');
+            // $(this).find('.settings-icon').toggleClass('fa-cog fa-arrow-circle-left')
         }
     });
     $('.settings-container input[type=checkbox][data-setting]').change(function () {
@@ -379,12 +494,14 @@ $(function () {
 
     $('.i_want_coffee_toggle').click(function () {
         $('.i_want_coffee_toggle_container').slideToggle(300);
+        $('.roulettes').slideUp(300);
         if (iwant_timer)
             clearTimeout(iwant_timer);
 
         iwant_timer = setTimeout(function () {
             $(".i_want_coffee_toggle_container").slideDown(100);
             $(".i_want_coffee_confirm").slideUp(100);
+            $('.roulettes').slideDown();
         }, 5000);
 
         $('.i_want_coffee_close').attr('data-countdown', '6');
@@ -394,6 +511,8 @@ $(function () {
     });
 
     $('.i_want_coffee_close').click(function () {
+        $('.roulettes').slideDown();
+        $('.advanced:visible').slideUp();
         if (iwant_timer)
             clearTimeout(iwant_timer);
 
@@ -421,6 +540,8 @@ $(function () {
     function countDown() {
         if (iwant_countdown)
             clearTimeout(iwant_countdown);
+
+
         if ($('.i_want_coffee_close[data-countdown]').length && parseInt($('.i_want_coffee_close').attr('data-countdown')) > 0) {
             $('.i_want_coffee_close').attr('data-countdown', parseInt($('.i_want_coffee_close').attr('data-countdown')) - 1);
             $('.i_want_coffee_close>span').html("Nee (" + $('.i_want_coffee_close').attr('data-countdown') + ")");
@@ -428,11 +549,58 @@ $(function () {
         }
     }
 
-//  ====================  Koffie Request Functions
-
-
     $(document).foundation();
 });
+
+function closeNewGroup() {
+    console.log("Closing New Group Window!")
+    $('.new-group').fadeOut(100, function () {
+        console.log("Some effects!")
+        $('.toggle-new-group').fadeIn(100);
+        $('.groups-container').fadeIn(100);
+    })
+}
+
+
+function updateGroups() {
+    groupsObj = getLocalStorageObj('groups');
+    groupNum = groupsObj?Object.keys(groupsObj).length:0;
+    var groupsHtml = "";
+    if (groupNum) {
+        for (var i in groupsObj) {
+            groupsHtml = groupsHtml + "<a class='button roulette_group' data-id='" + groupsObj[i].group_id + "'>" + groupsObj[i].group_name + "</a>";
+        }
+    } else {
+        groupsHtml = "<div class='text-italic text-center'>Er zijn nog geen groepen aangemaakt in uw netwerk.</div>";
+    }
+    $('.choose-group .available').html(Object.keys(getLocalStorageObj('groups')).length + " beschikbaar");
+
+    $('.available-groups').html(groupsHtml);
+    $('.roulette_group.button').click(function () {
+        socket.emit('group-signup', {group_id: $(this).data('id')});
+    });
+}
+
+function showNewGroupMessage() {
+    var message = getLocalStorageObj('newgroup_message');
+
+    if (!message)
+        return;
+    $('.new-group-alert, .new-group-success').hide();
+
+    console.log(message);
+
+    if (message.type === 'error') {
+        $('.new-group-alert .alert-text').html(message.message);
+        $('.new-group-alert').slideDown(100);
+    } else if (message.type === 'success') {
+        console.log("new message is success!")
+        closeNewGroup();
+        $('.new-group-success .alert-text').html(message.message);
+        $('.new-group-success').slideDown(100);
+        setLocalStorage('newgroup_message', '');
+    }
+}
 
 function setLocalStorage(name, obj) {
     localStorage.setItem(name, JSON.stringify(obj));
@@ -474,9 +642,9 @@ function initiateRoulette() {
 function requestResponse() {
     var response = getLocalStorageObj('request_response');
     if (response.type) {
-        if (response.type == 'success') {
+        if (response.type === 'success') {
             $(".i_want_coffee_done").html(response.message).slideDown(500).delay(5000).slideUp(500);
-        } else if (response.type == 'error') {
+        } else if (response.type === 'error') {
             $(".i_want_coffee_error").html(response.message).slideDown(500).delay(5000).slideUp(500);
         }
         $('.i_want_coffee_load').slideUp(500);
@@ -516,28 +684,37 @@ $(window).keydown(function (event) {
 var spinnerShowTimeout = false;
 
 window.addEventListener('storage', storageEventHandler, false);
+
 function storageEventHandler(evt) {
-    if (evt.key == "chatRecQueue") {
+    if (evt.key === "chatRecQueue") {
         processNewChatMessages(evt);
-    } else if (evt.key == "request_response") {
+    } else if (evt.key === "groups") {
+        updateGroups();
+    } else if (evt.key === "newgroup_message") {
+        showNewGroupMessage();
+    } else if (evt.key === "request_response") {
         requestResponse();
-    } else if (evt.key == "current_roulette") {
+    } else if (evt.key === "current_roulette") {
         currentRoulette();
         updateParticipants();
-    } else if (evt.key == "people_v2") {
+    } else if (evt.key === "connected") {
+        window.location.reload();
+    } else if (evt.key === "online") {
         updateParticipants();
-    } else if (evt.key == "init_spinner_data") {
+    } else if (evt.key === "init_spinner_data") {
         checkSpinnerActive();
         processInitRoulette();
-    } else if (evt.key == "spinposition") {
+    } else if (evt.key === "spinposition") {
         if (!rouletteSpinStarted)
             processInitRoulette();
         checkSpinnerActive();
         updateSpinPos();
-    } else if (evt.key == "settings") {
+    } else if (evt.key === "connected") {
+        updateData();
+    } else if (evt.key === "settings") {
         settings = getLocalStorageObj('settings');
         if (settings.balance) {
-            $('.balance').css('margin-left', '6px').html('(Saldo: '+settings.balance.toFixed(2)+' NLG)');
+            $('.balance').css('margin-left', '6px').html('(Saldo: ' + settings.balance.toFixed(2) + ' NLG)');
         }
     }
 }
@@ -547,7 +724,7 @@ function checkSpinnerActive() {
         clearTimeout(spinnerShowTimeout);
     }
     spinnerShowTimeout = setTimeout(function () {
-        $('.spinner:visible').slideUp(1000, function() {
+        $('.spinner:visible').slideUp(1000, function () {
 
         });
     }, 10000);
@@ -602,20 +779,24 @@ var gambleHtmlDone = {
     5: '<i class="guldensign" style="padding: 2px 0 2px 4px; margin:0;color: rgba(236, 88, 64, 0.38); border: 1px solid rgba(236, 88, 64, 0.38);" data-tooltip title="deed mee met de Gulden-gamble, maar had geen saldo" ></i>' // Gediskwalificeerd
 };
 var gambleHtmlSelf = {
-    'undefined':    '<a class="button changeGambleYes" style="background: #FFF; padding: 2px 0 2px 4px; margin:0;"><i class="guldensign" style="color: #999; cursor: pointer;"></i></a>',
-    null:           '<a class="button changeGambleYes" style="background: #FFF; padding: 2px 0 2px 4px; margin:0;"><i class="guldensign " style="color: #999; cursor: pointer;"></i></a>',
-    1:              '<a class="button changeGambleNo"  style="background: #FFF; padding: 2px 0 2px 4px; margin:0; border: 1px solid rgba(58, 219, 118, 0.38); text-align: center;"><i class="guldensign " style="color: #1169D6; cursor: pointer;"></i></a>',
-    2:              '<a class="button changeGambleYes" style="background: #FFF; padding: 2px 0 2px 4px; margin:0; border: 1px solid rgba(236, 88, 64, 0.38);"><i class="guldensign " style="color: #999; cursor: pointer;"></i></a>'
+    'undefined': '<a class="button changeGambleYes" style="background: #FFF; padding: 2px 0 2px 4px; margin:0;"><i class="guldensign" style="color: #999; cursor: pointer;"></i></a>',
+    null: '<a class="button changeGambleYes" style="background: #FFF; padding: 2px 0 2px 4px; margin:0;"><i class="guldensign " style="color: #999; cursor: pointer;"></i></a>',
+    1: '<a class="button changeGambleNo"  style="background: #FFF; padding: 2px 0 2px 4px; margin:0; border: 1px solid rgba(58, 219, 118, 0.38); text-align: center;"><i class="guldensign " style="color: #1169D6; cursor: pointer;"></i></a>',
+    2: '<a class="button changeGambleYes" style="background: #FFF; padding: 2px 0 2px 4px; margin:0; border: 1px solid rgba(236, 88, 64, 0.38);"><i class="guldensign " style="color: #999; cursor: pointer;"></i></a>'
 };
 var gambleHtmlSelfAfter = {
-    'undefined':    '<a class="button changeGambleAfterYes" style="background: #FFF; padding: 2px 0 2px 4px; margin:0;"><i class="guldensign" style="color: #999; cursor: pointer;"></i></a>',
-    null:           '<a class="button changeGambleAfterYes" style="background: #FFF; padding: 2px 0 2px 4px; margin:0;"><i class="guldensign " style="color: #999; cursor: pointer;"></i></a>',
-    1:              '<a class="button changeGambleAfterNo"  style="background: #FFF; padding: 2px 0 2px 4px; margin:0; text-align: center;  border: 1px solid rgba(58, 219, 118, 0.38); "><i class="guldensign " style="color: #1169D6; cursor: pointer;"></i></a>',
-    2:              '<a class="button changeGambleAfterYes" style="background: #FFF; padding: 2px 0 2px 4px; margin:0; border: 1px solid rgba(236, 88, 64, 0.38); "><i class="guldensign " style="color: #999; cursor: pointer;"></i></a>'
+    'undefined': '<a class="button changeGambleAfterYes" style="background: #FFF; padding: 2px 0 2px 4px; margin:0;"><i class="guldensign" style="color: #999; cursor: pointer;"></i></a>',
+    null: '<a class="button changeGambleAfterYes" style="background: #FFF; padding: 2px 0 2px 4px; margin:0;"><i class="guldensign " style="color: #999; cursor: pointer;"></i></a>',
+    1: '<a class="button changeGambleAfterNo"  style="background: #FFF; padding: 2px 0 2px 4px; margin:0; text-align: center;  border: 1px solid rgba(58, 219, 118, 0.38); "><i class="guldensign " style="color: #1169D6; cursor: pointer;"></i></a>',
+    2: '<a class="button changeGambleAfterYes" style="background: #FFF; padding: 2px 0 2px 4px; margin:0; border: 1px solid rgba(236, 88, 64, 0.38); "><i class="guldensign " style="color: #999; cursor: pointer;"></i></a>'
 };
 
+function myGroup() {
+
+}
+
 function updateParticipants() {
-    participants = getLocalStorageObj('people_v2');
+    participants = getLocalStorageObj('online');
     var participantAvailableHtml = "";
     var participantIdleHtml = "";
     var participantDisabledHtml = "";
@@ -645,8 +826,8 @@ function updateParticipants() {
             $('.start_roulette:visible').hide();
         }
     }
-    $(document).foundation();
 }
+
 function currentRoulette(noEffect) {
     if (currentRouletteTimer)
         clearInterval(currentRouletteTimer);
@@ -671,7 +852,7 @@ function currentRoulette(noEffect) {
 
         for (var user_id in current_roulette.participants) {
             if ($('.request_participants>.part_' + user_id).length == 0) {
-                $('.request_participants').append($("<div data-response='" + current_roulette.participants[user_id].response + "' class='row participant part_" + user_id + "'><div class='large-8 medium-8 small-8 columns name'>" + current_roulette.participants[user_id].name + "</div><div class='large-3 medium-3 small-3 columns response'>" + (myId == user_id ? responseHtmlSelf[current_roulette.participants[user_id].response] : responseHtml[current_roulette.participants[user_id].response]) + "</div><div "+(gamble?'':'style="display: none;"')+" class='gamble small-1 columns'>"+(myId == user_id ?gambleHtmlSelf[current_roulette.participants[user_id].gamble]:gambleHtml[current_roulette.participants[user_id].gamble])+"</div></div>"));
+                $('.request_participants').append($("<div data-response='" + current_roulette.participants[user_id].response + "' class='row participant part_" + user_id + "'><div class='large-8 medium-8 small-8 columns name'>" + current_roulette.participants[user_id].name + "</div><div class='large-3 medium-3 small-3 columns response'>" + (myId == user_id ? responseHtmlSelf[current_roulette.participants[user_id].response] : responseHtml[current_roulette.participants[user_id].response]) + "</div><div " + (gamble ? '' : 'style="display: none;"') + " class='gamble small-1 columns'>" + (myId == user_id ? gambleHtmlSelf[current_roulette.participants[user_id].gamble] : gambleHtml[current_roulette.participants[user_id].gamble]) + "</div></div>"));
             } else {
                 //if ($('.request_participants>.part_'+user_id).data('response') != current_roulette.participants[user_id].response) {
                 $('.request_participants>.part_' + user_id + ' .response').html(
@@ -688,7 +869,7 @@ function currentRoulette(noEffect) {
         }
 
         if (numWant == numParticipants) {
-                $('.request_spin').html("<a class='button spin_roulette' data-roulette='" + current_roulette.roulette.roulette_id + "' data-spincode='" + current_roulette.roulette.spin_code + "' style='width: 100%;'>Spin deze roulette</a>");
+            $('.request_spin').html("<a class='button spin_roulette' data-roulette='" + current_roulette.roulette.roulette_id + "' data-spincode='" + current_roulette.roulette.spin_code + "' style='width: 100%;'>Spin deze roulette</a>");
             $('.i_want_coffee_toggle').css('opacity', '0.2').css('background-color', '#CCC').css('color', '#333');
         } else {
             $('.request_spin').html("");
@@ -701,10 +882,18 @@ function currentRoulette(noEffect) {
             setLocalStorage('changeParticipation', {reaction: 2, roulette_id: current_roulette.roulette.roulette_id})
         });
         $('.changeGambleYes').click(function () {
-            setLocalStorage('changeParticipation', {reaction: 1, gamble: 1, roulette_id: current_roulette.roulette.roulette_id});
+            setLocalStorage('changeParticipation', {
+                reaction: 1,
+                gamble: 1,
+                roulette_id: current_roulette.roulette.roulette_id
+            });
         });
         $('.changeGambleNo').click(function () {
-            setLocalStorage('changeParticipation', {reaction: 1, gamble: 2, roulette_id: current_roulette.roulette.roulette_id});
+            setLocalStorage('changeParticipation', {
+                reaction: 1,
+                gamble: 2,
+                roulette_id: current_roulette.roulette.roulette_id
+            });
         });
         //$('.request_participants').html();
 
@@ -736,6 +925,7 @@ function processNewChatMessages(evt) {
 }
 
 var rouletteSpinStarted = false;
+
 function processInitRoulette() {
     if (!rouletteSpinStarted) {
         rouletteSpinStarted = true;
@@ -757,6 +947,7 @@ function processInitRoulette() {
         }
     }
 }
+
 var Colors = {};
 var initGebruikers = [];
 var users = [];

@@ -1,11 +1,11 @@
 /*
 
 Roulette chrome background socket magic!!
-Door Sebastiaan Pasma (sebastiaan [a] pixelq.nl / sebastiaan [a] pas.ma)
+Door Sebastiaan Pasma (sebastiaan [a] pas.ma)
 
 sockets worden hier geregeld en allemaal storage dingetjes voor opslag van settings, gebruikers e.d.
 
-TODO: Local storage communicatie tussen window en background verbeteren.
+TODO SP: Local storage communicatie tussen window en background verbeteren.
 
 */
 
@@ -20,17 +20,16 @@ var updateSettings = 0;
 var disabledCd = false;
 var secondsLeftDisabled = false;
 
-
 function isDevMode() {
-    return false; // !('update_url' in chrome.runtime.getManifest());
+    return !('update_url' in chrome.runtime.getManifest());
 }
 
 chrome.idle.setDetectionInterval(300);
 chrome.idle.onStateChanged.addListener(function(newstate) {
     var time = new Date();
-    if (newstate == 'locked' || newstate == 'idle') {
+    if (newstate === 'locked' || newstate === 'idle') {
         socket.emit('user_idle', {idle: true});
-    } else if (newstate == 'active' && lastState != 'active') {
+    } else if (newstate === 'active' && lastState !== 'active') {
         socket.emit('user_idle', {idle: false});
     }
     lastState = newstate;
@@ -68,9 +67,13 @@ function updateData(data) {
 }
 
 function storageEventHandler(evt) {
-    if (evt.key == "chatSentQueue") {
+    if (evt.key === "data") {
+        if (!socket.connected) {
+
+        }
+    } else if (evt.key === "chatSentQueue") {
         processNewChatMessages();
-    } else if (evt.key == "changeParticipation") {
+    } else if (evt.key === "changeParticipation") {
         var partObj = getLocalStorageObj('changeParticipation');
         if ((partObj.reaction && (partObj.reaction == "1" || partObj.reaction == "2")) || partObj.gamble) {
             if ((settings.gamble && !partObj.gamble) || partObj.gamble == 1) {
@@ -93,7 +96,7 @@ function storageEventHandler(evt) {
             socket.emit('request_response', partObj);
         }
         setLocalStorage('changeParticipation', []);
-    } else if (evt.key == "newRouletteRequest") {
+    } else if (evt.key === "newRouletteRequest") {
         var sendObj = getLocalStorageObj('newRouletteRequest');
         if (sendObj && sendObj.what) {
             if (settings.gamble) {
@@ -101,7 +104,7 @@ function storageEventHandler(evt) {
             }
             startRoulette(sendObj);
         }
-    } else if (evt.key == "settings") {
+    } else if (evt.key === "settings") {
         checkSettings();
     }
 }
@@ -130,7 +133,7 @@ function countDownDisabled() {
         setLocalStorage('settings', settings);
     }
 
-    if (secondsLeftDisabled % 20 === 0 || secondsLeftDisabled == false) {
+    if (secondsLeftDisabled % 20 === 0 || secondsLeftDisabled === false) {
         if (socket)
             socket.emit('user_disabled', {disabled: settings.disable_plugin});
     }
@@ -156,7 +159,7 @@ setInterval(function () {
         if (chatReceivedQueue.length) {
             var receivedNum = 0;
             $.each(chatReceivedQueue, function (id, val) {
-                if (val.type == 'chat')
+                if (val.type === 'chat')
                     receivedNum++;
             });
             if (receivedNum)
@@ -168,17 +171,21 @@ setInterval(function () {
         }
 
     }
-    if ((lastIconBadgeText != iconBadgeText) || (iconBadgeText == "")) {
+    if ((lastIconBadgeText !== iconBadgeText) || (iconBadgeText === "")) {
         chrome.browserAction.setBadgeText({text: iconBadgeText});
         lastIconBadgeText = iconBadgeText;
     }
     updateSettings++;
 
+    if (socket && (getLocalStorageObj('connected') !== socket.connected)) {
+        setLocalStorage('connected', socket.connected);
+    }
+
 }, 1000);
 
 setInterval(function() {
     check();
-}, 10000);
+}, 30000);
 
 function processNewChatMessages() {
     var newMessages = getLocalStorageObj('chatSentQueue');
@@ -195,13 +202,16 @@ if (!getLocalStorageObj('pos'))
 setLocalStorage('changeParticipation', []);
 setLocalStorage('chatRecQueue', []);
 setLocalStorage('newRouletteRequest', []);
-setLocalStorage('participants', []); // Oude manier van mensen tonen .. is nu people_v2, kan weg
-setLocalStorage('people_v2', []);
+setLocalStorage('participants', []); // Oude manier van mensen tonen .. is nu online, kan weg
+setLocalStorage('online', []);
 setLocalStorage('request_response', []);
 setLocalStorage('current_roulette', []);
 setLocalStorage('roulettes', []);
 setLocalStorage('init_spinner_data', []);
 setLocalStorage('spinposition', []);
+setLocalStorage('rouletteInfo', []);
+setLocalStorage('spinposition', false);
+
 
 
 var settings = getLocalStorageObj('settings');
@@ -237,7 +247,7 @@ function check() {
         setLocalStorage('pos', pos);
     };
 
-    if (connectionTimeout == false) { // Timeout voor het connecten zodat alles kan laden :)
+    if (connectionTimeout === false) { // Timeout voor het connecten zodat alles kan laden :)
         connectionTimeout = setTimeout(function() { checkSocket(); }, 5000);
     }
 
@@ -263,7 +273,7 @@ function addChatMessage(obj) {
 
     chatMessages.push(obj);
     chatReceivedQueue.push(obj);
-    if (obj.type == 'chat') {
+    if (obj.type === 'chat') {
         //audioMessage.play();
     }
 
@@ -274,7 +284,7 @@ function addChatMessage(obj) {
 function checkSettings() {
     settings = getLocalStorageObj('settings');
     var now = new Date();
-    if (settings.disable_plugin != false) {
+    if (settings.disable_plugin !== false) {
         var disabledPluginUntill = new Date(settings.disable_plugin);
         var secondsLeft = Math.floor((disabledPluginUntill - now) / 1000);
         if (secondsLeft > 0) {
@@ -314,7 +324,7 @@ function replaceName(text) {
 }
 
 function checkSocket() {
-    if (lastState == 'locked' || lastState == 'idle') {
+    if (lastState === 'locked' || lastState === 'idle') {
         return;
     }
 
@@ -325,8 +335,8 @@ function checkSocket() {
     if (serverInfo && serverInfo.user_id && !socket) {
         socket = io.connect('https://kantoorroulette.nl', {
             query: query,
-            // path: (isDevMode()?'/socket.dev':'/socket.io'),
-            path: '/socket.io',
+            path: '/plugin-socket',
+            // path: '/socket.io',
             reconnection: true,
             timeout: 5000,
             reconnectionDelay: 10000
@@ -338,17 +348,17 @@ function checkSocket() {
             check();
             updateData();
         });
-        // socket.on('disconnect', function () {
+        socket.on('disconnect', function () {
         //     addChatMessage({
         //         type: 'disconnect',
         //         message: 'Verbinding verbroken!',
         //         time: AddZero(new Date().getHours()) + ":" + AddZero(new Date().getMinutes())
         //     })
-        // });
+        });
         socket.on('update-server-info', function (obj) {
             setLocalStorage('roulettes', obj.roulettes);
-            setLocalStorage('people_v2', obj.people_v2);
-
+            setLocalStorage('online', obj.online);
+            setLocalStorage('groups', obj.groups);
         });
         socket.on('update-to-current-roulette', function (obj) {
             setLocalStorage('current_roulette', obj);
@@ -390,6 +400,15 @@ function checkSocket() {
             setLocalStorage('spinposition', obj);
         });
 
+        socket.on('newgroup-error', function(obj) {
+            setLocalStorage('newgroup_message', {message: obj.message, type: 'error'});
+        });
+
+        socket.on('newgroup-success', function(obj) {
+            console.log("newgroup_message!");
+            console.log(obj);
+            setLocalStorage('newgroup_message', {message: obj.message, type: 'success'});
+        });
 
         socket.on('popupMessage', function (obj) {
             popupMessage(obj);
@@ -427,8 +446,8 @@ function checkSocket() {
                                 rouletteInfoObj[roulette_id] = {};
                             }
 
-                            if (obj.type == 'initial' && !rouletteInfoObj[roulette_id].initialNotification) {
-                                var settings = getLocalStorageObj('settings');
+                            var settings = getLocalStorageObj('settings');
+                            if (obj.type === 'initial' && !rouletteInfoObj[roulette_id].initialNotification) {
                                 if (settings.speak_new)
                                     chrome.tts.speak(replaceName(obj.ttsText), {
                                         'lang': 'nl-NL',
@@ -436,8 +455,7 @@ function checkSocket() {
                                     });
                                 rouletteInfoObj[roulette_id].initialNotification = true;
                             }
-                            if (obj.type == 'reminder' && !rouletteInfoObj[roulette_id].reminderNotification) {
-                                var settings = getLocalStorageObj('settings');
+                            if (obj.type === 'reminder' && !rouletteInfoObj[roulette_id].reminderNotification) {
                                 if (settings.speak_reminder)
                                     chrome.tts.speak(replaceName(obj.ttsText), {
                                         'lang': 'nl-NL',
@@ -493,8 +511,11 @@ function checkSocket() {
             }
             //setLocalStorage('current_roulette', obj);
         });
-    } else if (socket) {
+    } else if (socket && serverInfo.user_id) {
         socket.io.opts.query = query;
+        if (!socket.connected) {
+            socket.connect();
+        }
     }
 }
 

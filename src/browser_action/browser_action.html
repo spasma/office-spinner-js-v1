@@ -4,30 +4,30 @@
     <meta charset="UTF-8">
     <title></title>
     <link rel="stylesheet" type="text/css" href="css/foundation.min.css">
-    <link rel="stylesheet" type="text/css" href="css/font-awesome.min.css">
     <link rel="stylesheet" type="text/css" href="css/plugin.css">
     <link rel="stylesheet" type="text/css" href="css/wdt-emoji-bundle.css">
-    <link rel="stylesheet" type="text/css" href="css/guldensign.css">
-
+    <script defer src="js/packs/regular.min.js"></script>
+    <script defer src="js/packs/brands.min.js"></script>
+    <script defer src="js/fontawesome.js"></script>
     <script src="js/jquery.js"></script>
     <script src="js/foundation.min.js"></script>
     <script src="js/emoji.min.js"></script>
     <script src="js/wdt-emoji-bundle.min.js"></script>
     <script src="js/action.js"></script>
-    <script src="js/effects.js"></script>
     <script src="js/colors.min.js"></script>
     <script src="js/p2.js"></script>
 </head>
 <body>
 <div id="mainPopup" class="collapse">
-    <div class="large-12 medium-12 small-12 collumns">
+    <div class="large-12 medium-12 small-12 columns">
         <header onselect="return false">
-            <div class="row logo collapse">
-                <span class="settings-toggle-container">
-                    <a class="gamble" style="display: none;" target="_blank" href="https://kantoorroulette.nl/account/gulden"><i class="guldensign"></i></a>
-                    <a class="disable_coffee" data-toggle="DND"><i class="fa fa-bell"></i></a>
-                    <a href="#" class="settings-toggle"><i class="fa fa-cog"></i></a>
-                </span>
+            <div class="logo collapse">
+                <div class="settings-toggle-container">
+                    <a class="gamble" style="display: none;" target="_blank" href="https://kantoorroulette.nl/account/gulden">
+                        <img src="img/gulden.png"/>
+                    </a> <a class="disable_coffee" data-toggle="DND"><i class="far fa-bell"></i></a>
+                    <a href="#" class="settings-toggle"><i class="far fa-cog settings-icon"></i></a>
+                </div>
                 <div class="dropdown-pane small" id="DND" data-dropdown data-hover="true" data-hover-pane="true">
                     <div class="text-center" style="margin-bottom: 12px;"><strong>Niet storen</strong></div>
                     <div class="remaining"></div>
@@ -41,10 +41,27 @@
                         <li><a data-time="today">Rest van de dag</a></li>
                     </ul>
                 </div>
-                <div class="large-12 medium-12 small-12 columns logo">
+                <div class="large-12 medium-12 small-12 cell logo">
                     <a href="https://kantoorroulette.nl/" target="_blank">
                         <img src="img/logo_kantoor_roulette.png"/>
                     </a>
+                </div>
+            </div>
+            <div class="login" style="display: none;">
+                <div class="grid-x login-container">
+                    <div class="large-8 large-offset-2 medium-8 medium-offset-2 small-10 small-offset-1 text-center subheader">
+                        <h1>Welkom bij KantoorRoulette!</h1>
+                        <h2>Je voornaam ophalen</h2>
+                        We hebben je alleen je naam en mailadres nodig! Login met een van de onderstaande diensten om je
+                        naam direct op te vragen en te beginnen.
+                        <span title="Dit is om te voorkomen dat iemand zich voordoet als een ander." class="has-tip tip-left" data-tooltip><i class="fa fa-info-circle"></i></span>
+                    </div>
+                    <div class="large-12 medium-12 small-12 text-center">
+                        <a class="facebookConnect button" style="background: #3b5998;">
+                            <i class="fab fa-facebook-f"></i>&nbsp;&nbsp;Facebook </a>
+                        <a class="googleConnect button" style="background: #db4437;"> <i class="fab fa-google"></i>&nbsp;&nbsp;Google
+                            Account </a>
+                    </div>
                 </div>
             </div>
         </header>
@@ -54,49 +71,134 @@
                 <canvas id="drawing_canvas" style="width: 400px;"></canvas>
             </div>
         </div>
-        <div class="login" style="display: none;">
-            <div class="row login-container">
-                <div class="large-12 medium-12 small-12 text-center subheader">
-                    <h2>Je voornaam ophalen</h2>
-                    Gebruik een van de onderstaande diensten om je naam op te vragen.
-                    <span title="Dit is om te voorkomen dat iemand zich voordoet als een ander." class="has-tip tip-left" data-tooltip><i class="fa fa-info-circle"></i></span>
+        <div class="loggedin">
+            <div class="grid-x helloUser">
+                <div class="large-12 medium-12 small-12 cell text-center dagWens-container">
+                    <span class="dagWens"></span>
+                    <span class="name" style="font-weight: bold;"></span>!<span class="balance"></span>
                 </div>
-                <div class="large-12 medium-12 small-12 text-center">
-                    <a class="facebookConnect button" style="background: #3b5998;">
-                        <i class="fa fa-facebook-official"></i> Facebook </a>
-                    <a class="googleConnect button" style="background: #db4437;"> <i class="fa fa-google"></i> Google
-                        Account </a>
+                <div class="large-12 medium-12 small-12 cell text-center">
+                    <a class="choose-group"><i class="far fa-users"></i> <span class="current-group">Niet in een groep</span>
+                    (<span class="available"></span>)</a>
                 </div>
             </div>
+            <div class="group-container">
+                <div class="grid-x">
+                    <div class="large-12 medium-12 small-12 cell text-center bigTitle">
+                        <h1><i class="fa fa-users"></i> Groepen</h1>
+                        <a class="toggle-new-group button"><i class="far fa-plus"></i>&nbsp;&nbsp;Nieuwe Groep</a>
+                        <div class="callout small success new-group-success" style="display: none">
+                            <span class="alert-text"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="grid-x new-group" style="display: none;">
+                    <div class="small-6 small-offset-3 cell">
+                        <div class="bigTitle">
+                            <h2>Nieuwe groep aanmaken</h2>
+                        </div>
+                        <div class="callout small alert new-group-alert" style="display: none">
+                            <i class="far fa-exclamation-triangle"></i>&nbsp;&nbsp;<span class="alert-text"></span>
+                        </div>
+                        <label>
+                            Groepnaam
+                            <input type="text" id="new_group_name"/>
+                        </label>
+                        <a class="button new-group-cancel">Annuleren</a> <a class="button new-group-create">Aanmaken</a>
+                    </div>
+                </div>
+                <div class="grid-x groups-container">
+                    <div class="large-12 medium-12 small-12 cell text-center bigTitle" style="margin: 14px 0 0px;">
+                        <h2><i class="fa fa-users"></i> Beschikbare groepen</h2>
+                    </div>
+                    <div class="small-8 small-offset-2 cell ">
+                        <div class="available-groups text-left"></div>
+                    </div>
+                </div>
+            </div>
+            <!--<div class="grid-x currently-container no-select">-->
+            <!--<div class="large-12 medium-12 small-12">-->
+            <!--<div>Momenteel aanwezig:</div>-->
+            <!--<div class="currently-available">-->
+            <!--<span class='radius label warning'><i class="fa fa-spin fa-spinner"></i> Momentje.. Bezig met verbinden..</span>-->
+            <!--</div>-->
+            <!--</div>-->
+            <!--</div>-->
+            <div id="content" class="grid-x">
+                <div class="large-12 medium-12 small-12 cell roulette_request_container" style="display: none;">
+                    <form method="post" class="roulette_form">
+                        <div class="start_roulette">
+                            <div class="grid-x i_want_coffee_toggle_container">
+                                <div class="large-12 medium-12 small-12 text-center">
+                                    <a class="i_want_coffee_toggle button"> <i class="far fa-coffee"></i>&nbsp;&nbsp;Ik
+                                        wil graag koffie! </a>
+                                </div>
+                            </div>
+                            <div class="grid-x i_want_coffee_confirm" style="display: none;">
+                                <div class="large-12 medium-12 small-12 cell text-center">
+                                    Je staat op het punt om een koffie aanvraag te doen, weet je het zeker?<br/>
+                                </div>
+                                <div class="advanced large-12 medium-12 small-12 cell grid-x" style="display: none;">
+                                    <div class="medium-offset-2 large-offset-2 small-offset-2 large-8 medium-8 small-8 cell">
+                                        <label> Roulette item
+                                            <input type="text" name="item" class="item" value="Koffie"/>
+                                        </label>
+                                        <label> Wat?
+                                            <input type="text" name="what" class="what" value="halen"/>
+                                        </label>
+                                        <label>
+                                            Reageertijd
+                                            <select name="timeout" class="timeout">
+                                                <option value="600">10 minuten</option>
+                                                <option value="360">5 minuten</option>
+                                                <option value="180">2,5 minuten</option>
+                                                <option value="120">2 minuten</option>
+                                                <option value="60" selected>1 minuut</option>
+                                                <option value="30">30 seconden</option>
+                                            </select>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="large-12 medium-12 small-12 cell text-center confirm-buttons-container confirm_buttons">
+                                    <a class="i_want_coffee_start button"> <i class="fa fa-coffee"></i> Ja, verstuur
+                                        uitnodiging! </a> <a class="i_want_coffee_close button">
+                                    <i class="fa fa-times"></i> <span>Nee</span> </a>
+                                </div>
+                                <div class="large-12 medium-12 small-12 cell text-center advancedLink">
+                                    <a href="#" class="geavanceerd">Geavanceerd (Aanvraag aanpassen)</a>
+                                </div>
+                            </div>
+                            <div class="i_want_coffee_done" style="display: none;">Uw verzoek is verstuurd!</div>
+                            <div class="i_want_coffee_error" style="display: none;">Er is nog een koffieverzoek bezig!
+                            </div>
+                            <div class="i_want_coffee_load" style="display: none;"><i class="fa fa-refresh fa-spin"></i>
+                                Een moment geduld.
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="large-12 medium-12 small-12 cell current_roulette_container" style="display: none">
+                    <h1>Huidige Aanvraag</h1>
+                    <div class="text-center request_text"></div>
+                    <div class='request_spin text-center'></div>
+                    <div class="request_participants"></div>
+                </div>
+            </div>
+            <div class="roulettes cell" style="display: none;"></div>
         </div>
-        <div class="settings-container" style="display: none;">
-            <div class="row">
-                <div class="large-12 medium-12 small-12 columns text-center settingsTitle">
+        <div class="settings-container">
+            <div class="grid-x">
+                <div class="large-12 medium-12 small-12 cell text-center bigTitle">
                     <h1><i class="fa fa-cog"></i> Instellingen</h1>
                 </div>
             </div>
-            <!--<div class="callout warning">-->
-            <!--<i class="fa-info-circle fa"></i> -->
-            <!--</div>-->
-            <!--<div class="row">-->
-            <!--<div class="large-6 medium-12 small-12 columns text-center ">-->
-            <!--<h2><i class="fa fa-bell-o"></i> Meldingen</h2>-->
-            <!--</div>-->
-            <!--</div>-->
-            <!--<div class="row">-->
-            <!--<div class="small-10 small-offset-2 columns">-->
-            <!--<label> <input disabled type="checkbox" data-setting="notification_new"> Melding bij nieuwe-->
-            <!--verzoeken </label> <label> <input disabled type="checkbox" data-setting="notification_reminder">-->
-            <!--"Laatste minuut om mee te doen" Melding </label>-->
-            <!--</div>-->
-            <!--</div>-->
-            <div class="row">
-                <div class="large-6 medium-12 small-12 columns text-center ">
+            <div class="grid-x">
+                <div class="large-6 medium-12 small-12 cell text-center ">
                     <h2><i class="fa fa-volume-up"></i> Geluid</h2>
                 </div>
             </div>
-            <div class="row">
-                <div class="small-10 small-offset-2 columns">
+            <div class="grid-x">
+                <div class="small-10 small-offset-2 cell">
                     <label>
                         <input type="checkbox" data-setting="speak_new">
                         Spreek nieuwe verzoeken uit
@@ -107,13 +209,13 @@
                     </label>
                 </div>
             </div>
-            <div class="row">
-                <div class="large-6 medium-12 small-12 columns text-center ">
+            <div class="grid-x">
+                <div class="large-6 medium-12 small-12 cell text-center ">
                     <h2><i class="fa fa-star"></i> Speciale Features</h2>
                 </div>
             </div>
-            <div class="row">
-                <div class="small-10 small-offset-2 columns">
+            <div class="grid-x">
+                <div class="small-10 small-offset-2 cell">
                     <label>
                         <input type="checkbox" data-setting="harco_feature">
                         Harco Feature
@@ -126,114 +228,91 @@
                     </label>
                 </div>
             </div>
-        </div>
-        <div class="loggedin" style="display: none;">
-            <div class="row helloUser">
-                <div class="large-12 medium-12 small-12 columns text-center dagWens-container">
-                    <span class="dagWens"></span> <span class="name" style="font-weight: bold;"></span>!<span class="balance"></span>
+            <div class="grid-x">
+                <div class="small-12 cell text-center">
+                    <a class="button button-logout">Uitloggen op deze computer</a>
+                    <div class="callout logout-sure" style="display: none;">
+                        <div class="small-12">
+                            Weet je zeker dat je uit wil loggen?
+                        </div>
+                        <div class="small-12">
+                            <a class="button button-logout-yes">Ja</a> <a class="button button-logout-no">Nee</a>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <!--<div class="row currently-container no-select">-->
-                <!--<div class="large-12 medium-12 small-12">-->
-                    <!--<div>Momenteel aanwezig:</div>-->
-                    <!--<div class="currently-available">-->
-                        <!--<span class='radius label warning'><i class="fa fa-spin fa-spinner"></i> Momentje.. Bezig met verbinden..</span>-->
-                    <!--</div>-->
-                <!--</div>-->
-            <!--</div>-->
         </div>
-        <div id="content" class="row">
-            <div class="large-12 medium-12 small-12 columns roulette_request_container" style="display: none;">
-                <form method="post" class="roulette_form">
-                    <div class="start_roulette">
-                        <div class="row i_want_coffee_toggle_container">
-                            <div class="large-12 medium-12 small-12 text-center">
-                                <a class="i_want_coffee_toggle button"> <i class="fa fa-coffee"></i> Ik wil graag
-                                    koffie! </a>
-                            </div>
-                        </div>
-                        <div class="row i_want_coffee_confirm" style="display: none;">
-                            <div class="large-12 medium-12 small-12 columns text-center">
-                                Je staat op het punt om een koffie aanvraag te doen, weet je het zeker?<br/>
-                            </div>
-                            <div class="advanced row" style="display: none;">
-                                <div class="medium-offset-2 large-offset-2 small-offset-2 large-8 medium-8 small-8 columns">
-                                    <label> Roulette item
-                                        <input type="text" name="item" class="item" value="Koffie"/>
-                                    </label>
-                                    <label> Wat?
-                                        <input type="text" name="what" class="what" value="halen"/>
-                                    </label>
-                                    <label>
-                                        Reageertijd
-                                        <select name="timeout" class="timeout">
-                                            <option value="600">10 minuten</option>
-                                            <option value="360">5 minuten</option>
-                                            <option value="180">2,5 minuten</option>
-                                            <option value="120">2 minuten</option>
-                                            <option value="60" selected>1 minuut</option>
-                                            <option value="30">30 seconden</option>
-                                        </select>
-                                    </label>
+        <div class="chat-spacer"></div>
+        <div class="grid-x chat cell">
+            <div class="small-12">
+                <div class="grid-x">
+                    <div class="small-12 collapse">
+                        <ul class="tabs chat-tabs" data-tabs id="chat-tabs">
+                            <li class="tabs-title is-active">
+                                <a href="#everybody" aria-selected="true">Everybody</a>
+                            </li>
+                            <li class="tabs-title">
+                                <a data-tabs-target="group" href="#group">Group</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="small-12 collapse">
+                        <div class="tabs-content" data-tabs-content="chat-tabs">
+                            <div class="tabs-panel is-active" id="everybody">
+                                <div class="grid-x">
+                                    <div class="small-9 cell">
+                                        <div class="messages-container"></div>
+                                    </div>
+                                    <div class="small-3 cell">
+                                        <div class="currently">
+                                            <div class="currently-available">
+                                                <div style="display: block;" class="connecting text-center">
+                                                    <span class='radius label warning'>
+                                                        <i class="fa fa-spin fa-spinner"></i><br/>Bezig met verbinden..
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div class="currently-idle"></div>
+                                            <div class="currently-disabled"></div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="large-12 medium-12 small-12 columns text-center confirm-buttons-container confirm_buttons">
-                                <a class="i_want_coffee_start button"> <i class="fa fa-coffee"></i> Ja, verstuur
-                                    uitnodiging! </a> <a class="i_want_coffee_close button"> <i class="fa fa-times"></i>
-                                <span>Nee</span> </a>
-                            </div>
-                            <div class="large-12 medium-12 small-12 columns text-center advancedLink">
-                                <a href="#" class="geavanceerd">Geavanceerd (Aanvraag aanpassen)</a>
-                            </div>
-                        </div>
-                        <div class="i_want_coffee_done" style="display: none;">Uw verzoek is verstuurd!</div>
-                        <div class="i_want_coffee_error" style="display: none;">Er is nog een koffieverzoek bezig!
-                        </div>
-                        <div class="i_want_coffee_load" style="display: none;"><i class="fa fa-refresh fa-spin"></i> Een
-                            moment geduld.
-                        </div>
-                    </div>
-                </form>
-            </div>
-            <div class="large-12 medium-12 small-12 columns current_roulette_container" style="display: none">
-                <h1>Huidige Aanvraag</h1>
-                <div class="text-center request_text"></div>
-                <div class='request_spin text-center'></div>
-                <div class="request_participants"></div>
-            </div>
-        </div>
-        <div class="row roulettes columns" style="display: none;"></div>
-        <div class="chat-spacer"></div>
-        <div class="row chat columns">
-            <div class="small-12">
-                <div class="row">
-                    <div class="small-3 columns">
-                        <div class="currently">
-                        <div class="currently-available">
-                            <div style="display: block;" class="connecting text-center"><span class='radius label warning'>
-                                <i class="fa fa-spin fa-spinner"></i><br/>Bezig met verbinden..</span>
+                            <div class="tabs-panel" id="group">
+                                <div class="grid-x">
+                                    <div class="small-9 cell">
+                                        <div class="messages-container"></div>
+                                    </div>
+                                    <div class="small-3 cell">
+                                        <div class="currently">
+                                            <div class="currently-available">
+                                                <div style="display: block;" class="connecting text-center">
+                                                    <span class='radius label warning'>
+                                                        <i class="fa fa-spin fa-spinner"></i><br/>Bezig met verbinden..
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div class="currently-idle"></div>
+                                            <div class="currently-disabled"></div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        <div class="currently-idle"></div>
-                        <div class="currently-disabled"></div>
-                        </div>
-                    </div>
-                    <div class="small-9 columns">
-                        <div class="messages-container"></div>
                     </div>
                 </div>
             </div>
             <div class="small-12">
                 <input type="text" class="newMessage form-control wdt-emoji-bundle-enabled" placeholder="Typ een chatbericht.."/>
             </div>
-            <!--<div class="small-1 columns">-->
+            <!--<div class="small-1 cell">-->
             <!--<a class="emoji">:)</a>-->
             <!--</div>-->
         </div>
     </div>
-    <div class="load text-center row" style="height: 200px;">
+    <div class="load text-center grid-x" style="height: 200px;">
         <div class="large-12 medium-12 small-12">
-            <i class="fa fa-refresh fa-spin"></i>
+            <i class="far fa-refresh fa-spin"></i>
         </div>
     </div>
 </div>
