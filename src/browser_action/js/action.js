@@ -109,7 +109,7 @@ function updateRoulettes() {
                 $('.roulettes').prepend("<div class='row' data-row-roulette='" + roulette.roulette_id + "'>" +
                     "<div class='large-12 medium-12 small-12 columns'>" +
                     "<div class='click-bar open_roulette' data-roulette='" + roulette.roulette_id + "' style='text-align: left;'>" +
-                    "<a href='#' style='color: #cecece'>" + AddZero(date.getHours()) + ":" + AddZero(date.getMinutes()) + " : <i class='fa fa-plus-circle fa-spin'></i> " + roulette.roulette_item + " " + roulette.roulette_what + " (aanvraag van " + roulette.initiator + ")" + "</a></div>" +
+                    "<a href='#' style='color: #cecece'>" + AddZero(date.getHours()) + ":" + AddZero(date.getMinutes()) + " : <i class='fa "+(roulette.roulette_item.substr(0, 6).toLowerCase() == "koffie"?"fa-coffee":"fa-plus-circle")+" "+(roulette.loser?'':'fa-spin')+"'></i> " + roulette.roulette_item + " " + roulette.roulette_what + " aanvraag: " + roulette.initiator + "</a></div>" +
                     "<div class='content'>" +
                     rouletteContent(roulette) +
                     "</div>" +
@@ -120,8 +120,10 @@ function updateRoulettes() {
         }
     });
     $('.roulettes .row:first .click-bar a').css('color', '#000');
-    if ($('.roulette_participants:visible').length == 0)
-         $('.roulette_participants:first').show();
+    if ($('.roulette_participants:visible').length == 0 || $('.roulette_participants:visible').length > 1) {
+        $('.roulette_participants').hide();
+        $('.roulette_participants:first').show();
+    }
 }
 function rouletteContent(roulette) {
     var partHtml = "";
@@ -132,7 +134,12 @@ function rouletteContent(roulette) {
 
     if ($('[data-row-roulette="' + roulette.roulette_id + '"]').length) {
         $('[data-row-roulette="' + roulette.roulette_id + '"] .participants').html(partHtml);
-        $('[data-row-roulette="' + roulette.roulette_id + '"] .losers').html((roulette.loser?roulette.loser+' was de verliezer':'Nog geen verliezer bepaald'));
+        if (roulette.loser) {
+            $('[data-row-roulette="' + roulette.roulette_id + '"] .losers').html(roulette.loser + ' was de verliezer').css({ color: 'red' });
+            $('[data-row-roulette="' + roulette.roulette_id + '"] .spin_roulette').hide();
+        } else
+            $('[data-row-roulette="' + roulette.roulette_id + '"] .losers').html('Nog geen verliezer bepaald');
+
         return;
     }
 
@@ -264,7 +271,7 @@ $(function () {
         $('.roulette_' + $(this).data('roulette')).slideToggle(200);
 
     });
-    $('.roulettes').on('click', '.spin_roulette', function () {
+    $('.roulettes, .current_roulette_container').on('click', '.spin_roulette', function () {
         var newURL = "http://kantoorroulette.nl/apiv2/spin/roulette_id/" + ($(this).data('roulette')+"?code="+$(this).data('spincode'));
         chrome.tabs.create({url: newURL});
     });

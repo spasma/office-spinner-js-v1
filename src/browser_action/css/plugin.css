@@ -9,7 +9,7 @@ body, html {
     /*padding: 6px;*/
     margin: 0px;
     padding: 0px;
-    /*height: auto;*/
+    height: 590px;
     width: 400px;
     font-family: Helvetica, Ubuntu, Arial, sans-serif;
     cursor: default;
@@ -22,6 +22,11 @@ h1 {
     line-height: 40px;
     text-align: center;
 }
+
+.i_want_coffee_toggle {
+    margin-bottom: 0px;
+}
+
 
 .logo img {
     height: 40px;
@@ -85,7 +90,14 @@ header {
 .login-container {
     margin-top: 12px;
 }
-
+.chat {
+    position: fixed;
+    bottom: 0px;
+    background: #FFF;
+}
+.chat-spacer {
+    height: 156px;
+}
 .messages-container {
     border-top: #777777 solid 1px;
     height: 100px;
@@ -98,8 +110,6 @@ input.newMessage {
     padding: 0px 5px !important;
     font-size: 1rem;
     height: 18px;
-    position: fixed;
-    bottom: 0px;
     border: 0 !important;
     border-top: 1px #cecece solid !important;
     outline-offset: 0;
