@@ -282,7 +282,7 @@ a.emoji {
 .request_participants {
     /*margin-bottom: 12px;*/
     overflow: auto;
-    height: 170px;
+    height: 255px;
 }
 .request_participants>.participant:nth-child(odd),.roulettes>.row:nth-child(odd) {
     background: #f9f9f9;
