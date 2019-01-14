@@ -15,7 +15,7 @@
 <script src="action.js"></script>
 
 <div id="mainPopup">
-    <h1 style="text-align: center;">Koffie Roulette</h1>
+    <h1 style="text-align: center;"><img style="width: 40px;" src="img/icon.png"/><br/>Koffie Roulette</h1>
 
     <div class="loggedin" style="display: none; text-align: center;">
         <p style="display: block;">
@@ -44,7 +44,7 @@
             </div>
             <p class="start_roulette" style="display: block; text-align: center;">
 
-                <label>
+                <label style="display: none;">
                     Reageertijd
                     <select name="timeout">
                         <option value="600">10 minuten</option>
@@ -53,9 +53,9 @@
                     </select>
                 </label>
 
-
-
-                <input type="button" value="Ik wil Koffie!">
+                <input class="i_want_coffee" type="button" value="Ik wil Koffie!">
+                <span class="i_want_coffee_done" style="display: none;">Uw verzoek is verstuurd!</span>
+                <span class="i_want_coffee_error" style="display: none;">Er is nog een koffieverzoek bezig!</span>
             </p>
         </form>
 
