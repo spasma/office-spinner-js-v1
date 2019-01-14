@@ -1,0 +1,115 @@
+<!doctype html>
+<head>
+    <link rel="stylesheet" type="text/css" href="css/foundation.min.css">
+    <style type="text/css">
+        @import url(http://fonts.googleapis.com/css?family=Open+Sans:400italic,600italic,700italic,400,300,600,700|Press+Start+2P);
+
+        #mainPopup {
+            /*padding: 6px;*/
+            height: auto;
+            width: 400px;
+            font-family: Helvetica, Ubuntu, Arial, sans-serif;
+        }
+        .i_want_coffee_toggle {
+            margin: 6px 0;
+        }
+        h1 {
+            font-size: 1.2em;
+            text-align: center;
+            font-family: "Press start 2p", "open sans", Helvetica, sans-serif;
+            margin: 4px 0;
+        }
+
+        .currently_available {
+            margin-bottom: 6px;
+        }
+
+        .confirm_buttons {
+            margin-top: 9px;
+        }
+    </style>
+    <script src="jquery.js"></script>
+    <script src="socket.io.js"></script>
+    <script src="action.js"></script>
+    <script src="foundation.min.js"></script>
+
+</head>
+<body>
+<div id="mainPopup" class="row">
+    <div class="large-12 medium-12 small-12">
+        <h1><span><img style="width: 25px;  margin-right: 6px;" src="img/icon.png"/></span>Kantoor Roulette</h1>
+
+        <div class="loggedin" style="display: none; text-align: center;">
+            <div class="row">
+                <div class="large-12 medium-12 small-12 columns">
+                    <span class="dagWens"></span> <span class="name" style="font-weight: bold;"></span>!
+                </div>
+            </div>
+
+            <form method="post" class="roulette_form">
+                <input type="hidden" name="item" value="Koffie"/>
+                <input type="hidden" name="what" value="halen"/>
+
+                <p style="display: none;">
+                    <label>
+                        <input class="everybody" name="everybody" type="checkbox" value="1" checked/> Iedereen deze
+                        server
+                    </label>
+                </p>
+
+                <div class="start_roulette" style="display: block; text-align: center;">
+                    <label style="display: none;">
+                        Reageertijd
+                        <select name="timeout">
+                            <option value="600">10 minuten</option>
+                            <option value="360" selected>5 minuten</option>
+                            <option value="120">2 minuten</option>
+                        </select>
+                    </label>
+
+                    <div class="i_want_coffee_toggle_container">
+                        <input class="i_want_coffee_toggle button small" type="button" value="Ik wil graag koffie!"/>
+                    </div>
+                    <div class="i_want_coffee_confirm" style="display: none; padding: 9px;">
+                        Je staat op het punt om een koffie aanvraag te doen, weet je het zeker?<br/>
+
+                        <div class="row confirm_buttons">
+                            <div class="large-6 medium-6 small-6 columns">
+                                <input class="i_want_coffee_start button" type="button"
+                                       value="Ja, verstuur uitnodiging!"/>
+                            </div>
+                            <div class="large-6 medium-6 small-6 columns">
+                                <input class="i_want_coffee_close button" type="button" value="Nee"/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="i_want_coffee_done" style="display: none;">Uw verzoek is verstuurd!</div>
+                    <div class="i_want_coffee_error" style="display: none;">Er is nog een koffieverzoek bezig!</div>
+                    <div class="row">
+                        <div class="large-12 medium-12 small-12 columns currenly_available_container">
+                            <span style="display: block; font-weight: bold">Momenteel beschikbaar:</span>
+                            <span class="currently_available" style="display: block;"></span>
+                        </div>
+                    </div>
+                </div>
+            </form>
+                <div class="large-12 medium-12 small-12 columns roulettes_container">
+                    <div class="roulettes"></div>
+                </div>
+        </div>
+        <div class="login" style="display: none;">
+            <p style="display: block; margin: auto auto; width: 60%;">
+                <a class="facebookConnect" href="#">
+                    <img style="width: 100%;" src="img/fbconnect.png"/>
+                </a>
+                <a class="googleConnect" href="#">
+                    <img style="width: 100%;" src="img/google_signin_button.png"/>
+                </a>
+            </p>
+        </div>
+        <div class="load">
+            <i class="fa fa-"></i>
+        </div>
+    </div>
+</div>
+</body>

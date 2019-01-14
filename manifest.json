@@ -1,6 +1,6 @@
 {
   "name": "Kantoor Roulette",
-  "version": "0.9.8",
+  "version": "0.9.9",
   "manifest_version": 2,
   "description": "Officiële Kantoor Roulette Chrome Plugin",
   "homepage_url": "http://kantoorroulette.nl",
@@ -11,6 +11,8 @@
   },
   "background": {
     "scripts": [
+      "src/bg/jquery.min.js",
+      "src/bg/socket.io.js",
       "src/bg/background.js"
     ],
     "persistent": true

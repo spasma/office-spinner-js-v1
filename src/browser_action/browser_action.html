@@ -1,98 +1,202 @@
-<!doctype html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-    <style type="text/css">
-        @import url(http://fonts.googleapis.com/css?family=Open+Sans:400italic,600italic,700italic,400,300,600,700|Press+Start+2P);
-
-        #mainPopup {
-            padding: 6px;
-            height: auto;
-            width: 300px;
-            font-family: Helvetica, Ubuntu, Arial, sans-serif;
-        }
-
-        h1 {
-            font-size: 1.3em;
-            text-align: center;
-            padding: 2px;
-            font-family: "Press start 2p", "open sans", Helvetica, sans-serif;
-        }
-
-        .currently_available {
-            margin-bottom: 12px;
-        }
-
-        .confirm_buttons {
-            margin-top: 9px;
-        }
-    </style>
-    <script src="jquery.js"></script>
-    <script src="action.js"></script>
+    <meta charset="UTF-8">
+    <title></title>
+    <link rel="stylesheet" type="text/css" href="css/foundation.min.css">
+    <link rel="stylesheet" type="text/css" href="css/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="css/plugin.css">
+    <script src="js/jquery.js"></script>
+    <script src="js/foundation.min.js"></script>
+    <script src="js/action.js"></script>
+    <script src="js/effects.js"></script>
+    <script src="js/colors.min.js"></script>
+    <script src="js/p2.js"></script>
+    <!--<script src="js/spinner.js"></script>-->
 </head>
 <body>
-<div id="mainPopup">
-    <h1><span><img style="width: 25px;  margin-right: 6px;" src="img/icon.png"/></span>Kantoor Roulette</h1>
-
-    <div class="loggedin" style="display: none; text-align: center;">
-        <p style="display: block;">
-            <span class="dagWens"></span> <span class="name" style="font-weight: bold;"></span>!
-        </p>
-
-        <form method="post" class="roulette_form">
-            <input type="hidden" name="item" value="Koffie"/>
-            <input type="hidden" name="what" value="halen"/>
-
-            <p style="display: none;">
-                <label>
-                    <input class="everybody" name="everybody" type="checkbox" value="1" checked/> Iedereen deze server
-                </label>
-            </p>
-
-            <div class="start_roulette" style="display: block; text-align: center;">
-                <label style="display: none;">
-                    Reageertijd
-                    <select name="timeout">
-                        <option value="600">10 minuten</option>
-                        <option value="360" selected>5 minuten</option>
-                        <option value="120">2 minuten</option>
-                    </select>
-                </label>
-
-                <div class="i_want_coffee_toggle_container">
-                    <input class="i_want_coffee_toggle" type="button" value="Ik wil graag koffie!"/>
-                </div>
-                <div class="i_want_coffee_confirm" style="display: none; padding: 9px;">
-                    Je staat op het punt om een koffie aanvraag te doen, weet je het zeker?<br/>
-
-                    <p class="confirm_buttons">
-                        <input class="i_want_coffee_start" type="button" value="Ja, verstuur uitnodiging!"/> - <input
-                            class="i_want_coffee_close" type="button" value="Nee"/>
-                    </p>
-                </div>
-                <span class="i_want_coffee_done" style="display: none;">Uw verzoek is verstuurd!</span>
-                <span class="i_want_coffee_error" style="display: none;">Er is nog een koffieverzoek bezig!</span>
-                <span class="currenly_available_container"
-                      style="display: block; margin-top: 12px; margin-left: 30%; text-align: left;">
-                    <span style="display: block; font-weight: bold">Momenteel beschikbaar:</span>
-                    <span class="currently_available" style="display: block;">
-
-                    </span>
+<div id="mainPopup" class="collapse">
+    <div class="large-12 medium-12 small-12 collumns">
+        <header onselect="return false">
+            <div class="row logo collapse">
+                <span class="settings-toggle-container">
+                    <a href="#" class="settings-toggle"><i class="fa fa-cog"></i></a>
                 </span>
+                <div class="large-12 medium-12 small-12 columns">
+                    <h1 id="groovy">Kantoor Roulette</h1>
+                </div>
             </div>
-        </form>
-
-        <div class="roulettes_container" style="background-color: #EEE; padding: 6px;">
-            <div class="roulettes"></div>
+        </header>
+        <!--<canvas id="drawing_canvas" style="width: 400px;"></canvas>-->
+        <div class="login" style="display: none;">
+            <div class="row login-container">
+                <div class="large-12 medium-12 small-12 text-center subheader">
+                    <h2>Je voornaam ophalen</h2>
+                    Gebruik een van de onderstaande diensten om je naam op te vragen. <span
+                        title="Dit is om te voorkomen dat iemand zich voordoet als een ander." class="has-tip tip-left"
+                        data-tooltip><i class="fa fa-info-circle"></i></span>
+                </div>
+                <div class="large-12 medium-12 small-12 text-center">
+                    <a class="facebookConnect button" style="background: #3b5998;">
+                        <i class="fa fa-facebook-official"></i> Facebook
+                    </a>
+                    <a class="googleConnect button" style="background: #db4437;">
+                        <i class="fa fa-google"></i> Google Account
+                    </a>
+                </div>
+            </div>
         </div>
-    </div>
-    <div class="login" style="display: none;">
-        <p style="display: block; margin: auto auto; width: 60%;">
-            <a class="facebookConnect" href="#">
-                <img style="width: 100%;" src="img/fbconnect.png"/>
-            </a>
-            <a class="googleConnect" href="#">
-                <img style="width: 100%;" src="img/google_signin_button.png"/>
-            </a>
-        </p>
+
+        <div class="settings-container" style="display: none;">
+            <div class="row">
+                <div class="large-12 medium-12 small-12 columns text-center settingsTitle">
+                    <h2><i class="fa fa-cog"></i> Instellingen</h2>
+                </div>
+            </div>
+            <div class="callout warning">
+                <i class="fa-info-circle fa"></i> Beschikbaar in de volgende versie
+            </div>
+            <div class="row">
+                <div class="large-6 medium-12 small-12 columns text-center ">
+                    <h2><i class="fa fa-bell-o"></i> Meldingen</h2>
+                </div>
+            </div>
+            <div class="row">
+                <div class="small-10 small-offset-2 columns">
+                    <label>
+                        <input disabled type="checkbox" data-setting="notification_new"> Melding bij nieuwe verzoeken
+                    </label>
+                    <label>
+                        <input disabled type="checkbox" data-setting="notification_reminder"> "Laatste minuut om mee te doen" Melding
+                    </label>
+                </div>
+            </div>
+            <div class="row">
+                <div class="large-6 medium-12 small-12 columns text-center ">
+                    <h2><i class="fa fa-volume-up"></i> Geluid</h2>
+                </div>
+            </div>
+            <div class="row">
+                <div class="small-10 small-offset-2 columns">
+                    <label>
+                        <input disabled type="checkbox" data-setting="speak_new"> Spreek nieuwe verzoeken uit
+                    </label>
+                    <label>
+                        <input disabled type="checkbox" data-setting="speak_reminder"> "Laatste minuut om mee te doen" uitspreken
+                    </label>
+                </div>
+            </div>
+        </div>
+        
+        <div class="loggedin" style="display: none;">
+            <div class="row helloUser">
+                <div class="large-12 medium-12 small-12 columns text-center">
+                    <span class="dagWens"></span> <span class="name" style="font-weight: bold;"></span>!
+                </div>
+            </div>
+            <div class="row currently-container no-select">
+                <div class="large-12 medium-12 small-12">
+                    <div>Momenteel aanwezig:</div>
+                    <div class="currently-available">
+
+                    </div>
+                </div>
+            </div>
+            <div id="content" class="row">
+                <div class="large-12 medium-12 small-12 columns roulette_request_container" style="display: none;">
+                    <form method="post" class="roulette_form">
+                        <div class="start_roulette">
+                            <div class="row i_want_coffee_toggle_container">
+                                <div class="large-12 medium-12 small-12 text-center">
+                                    <a class="i_want_coffee_toggle button small">
+                                        <i class="fa fa-coffee"></i> Ik wil graag koffie!
+                                    </a>
+                                </div>
+                            </div>
+
+                            <div class="row i_want_coffee_confirm" style="display: none;">
+                                <div class="large-12 medium-12 small-12 columns text-center">
+                                    Je staat op het punt om een koffie aanvraag te doen, weet je het zeker?<br/>
+                                </div>
+
+                                <div class="advanced row" style="display: none;">
+                                    <div class="medium-offset-2 large-offset-2 small-offset-2 large-8 medium-8 small-8 columns">
+                                    <label>
+                                        Roulette item
+                                        <input type="text" name="item" class="item" value="Koffie"/>
+                                    </label>
+                                    <label>
+                                        Wat?
+                                        <input type="text" name="what" class="what" value="halen"/>
+                                    </label>
+                                    <label>
+                                        Reageertijd
+                                        <select name="timeout" class="timeout">
+                                            <option value="600">10 minuten</option>
+                                            <option value="360">5 minuten</option>
+                                            <option value="40" selected>2,5 minuten (originele plugin)</option>
+                                            <option value="120">2 minuten</option>
+                                        </select>
+                                    </label>
+                                    </div>
+                                </div>
+
+                                <div class="large-12 medium-12 small-12 columns text-center confirm-buttons-container confirm_buttons">
+                                    <a class="i_want_coffee_start button small">
+                                        <i class="fa fa-coffee"></i> Ja, verstuur uitnodiging!
+                                    </a>
+                                    <a class="i_want_coffee_close button small">
+                                        <i class="fa fa-times"></i> <span>Nee</span>
+                                    </a>
+                                </div>
+
+                                <div class="large-12 medium-12 small-12 columns text-center advancedLink">
+                                    <a href="#" class="geavanceerd">Geavanceerd</a>
+                                </div>
+                            </div>
+                            <div class="i_want_coffee_done" style="display: none;">Uw verzoek is verstuurd!</div>
+                            <div class="i_want_coffee_error" style="display: none;">Er is nog een koffieverzoek bezig!
+                            </div>
+                            <div class="i_want_coffee_load" style="display: none;"><i class="fa fa-refresh fa-spin"></i>
+                                Een moment geduld.
+                            </div>
+
+                        </div>
+                    </form>
+                </div>
+                <div class="large-12 medium-12 small-12 columns current_roulette_container" style="display: none">
+                        <h1>Huidige Aanvraag</h1>
+                    <div class="text-center request_text">
+                        
+                    </div>
+                    <div class="text-center request_time">
+                        
+                    </div>
+                    <div class="request_participants">
+                        
+                    </div>
+                </div>
+            </div>
+            <div class="row roulettes columns" style="display: none;">
+                
+            </div>
+            <div class="row chat columns">
+                <span>Chat</span>
+
+                <div class="messages-container">
+
+                </div>
+                <div>
+                    <input type="text" class="newMessage" placeholder="Typ een chatbericht.."/>
+                </div>
+            </div>
+        </div>
+        <div class="load text-center row" style="height: 200px;">
+            <div class="large-12 medium-12 small-12">
+                <i class="fa fa-refresh fa-spin"></i>
+            </div>
+        </div>
     </div>
 </div>
 </body>
+</html>
