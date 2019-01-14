@@ -43,7 +43,7 @@ function createMessageHtml(obj) {
     //fa fa-plus-circle
 
 
-    return '<div class="row collapse"><div class="large-12 medium-12 small-12">' + wdtEmojiBundle.render(text) + '</div></div>';
+    return '<div class="row collapse"><div class="small-12">' + wdtEmojiBundle.render(text) + '</div></div>';
 }
 
 function updateData() {
@@ -98,7 +98,7 @@ function updateRoulettes() {
     if (roulettes !== null) {
         $.each(roulettes, function (num, roulette) {
 
-            //$('.roulettes').append('<div class="large-12 medium-12 small-12 columns"><i class="fa fa-plus-circle fa-spin"></i> '+roulette.roulette_item+'</div>')
+            //$('.roulettes').append('<div class="small-12 columns"><i class="fa fa-plus-circle fa-spin"></i> '+roulette.roulette_item+'</div>')
             var date = new Date(roulette.date);
 
             if (date.getDate() == new Date().getDate()) {
@@ -107,7 +107,7 @@ function updateRoulettes() {
                     // $('[data-row-roulette="' + roulette.roulette_id + '"] .content').html(newContent);
                 } else {
                     $('.roulettes').prepend("<div class='row' data-row-roulette='" + roulette.roulette_id + "'>" +
-                        "<div class='large-12 medium-12 small-12 columns'>" +
+                        "<div class='small-12 columns'>" +
                         "<div class='click-bar open_roulette' data-roulette='" + roulette.roulette_id + "' style='text-align: left;'>" +
                         "<a href='#' style='color: #cecece'>" + AddZero(date.getHours()) + ":" + AddZero(date.getMinutes()) + " : <i class='fa " + (roulette.roulette_item.substr(0, 6).toLowerCase() == "koffie" ? "fa-coffee" : "fa-plus-circle") + " " + (roulette.loser ? '' : 'fa-spin') + "'></i> " + roulette.roulette_item + " " + roulette.roulette_what + " aanvraag: " + roulette.initiator + "</a></div>" +
                         "<div class='content'>" +
@@ -209,14 +209,14 @@ $(function () {
     data = getLocalStorageObj('data');
 //  ====================  LOGIN Functions 
     dataToSend = {api_key: (data && data.api_key) ? data.api_key : "none"};
-    jQuery.getJSON('http://kantoorroulette.nl/apiv2/rouletteserver', dataToSend, function (data) {
+    jQuery.getJSON('https://kantoorroulette.nl/apiv2/rouletteserver', dataToSend, function (data) {
         setLocalStorage('data', data);
         updateData();
     });
     updateData();
 
     $('.facebookConnect').click(function () {
-        var newURL = "http://kantoorroulette.nl/fb/";
+        var newURL = "https://kantoorroulette.nl/fb/";
         chrome.tabs.create({url: newURL});
     });
     $('.emoji').html(wdtEmojiBundle.render(':)'));
@@ -231,7 +231,7 @@ $(function () {
     })
 
     $('.googleConnect').click(function () {
-        var newURL = "http://kantoorroulette.nl/goog/";
+        var newURL = "https://kantoorroulette.nl/goog/";
         chrome.tabs.create({url: newURL});
     });
 
@@ -368,7 +368,7 @@ $(function () {
 
     });
     $('.roulettes, .current_roulette_container').on('click', '.spin_roulette', function () {
-        var newURL = "http://kantoorroulette.nl/apiv2/spin/roulette_id/" + ($(this).data('roulette') + "?code=" + $(this).data('spincode'));
+        var newURL = "https://kantoorroulette.nl/apiv2/spin/roulette_id/" + ($(this).data('roulette') + "?code=" + $(this).data('spincode'));
         chrome.tabs.create({url: newURL});
     });
 

@@ -118,6 +118,10 @@ setInterval(function () {
 
 }, 1000);
 
+setInterval(function() {
+    check();
+}, 10000);
+
 function processNewChatMessages() {
     var newMessages = getLocalStorageObj('chatSentQueue');
     $.each(newMessages, function (num, text) {

@@ -229,7 +229,7 @@ a.emoji {
 }
 
 .wdt-emoji-popup {
-    bottom: 20px !important
+    bottom: 24px !important
 }
 .wdt-emoji-picker {
     position: absolute;
@@ -255,4 +255,7 @@ a.emoji {
 }
 #wdt-emoji-preview-text {
     top: 4px !important;
+}
+.wdt-emoji-popup h3.sticky {
+    width: 100%;
 }
