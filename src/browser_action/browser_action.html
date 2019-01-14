@@ -1,0 +1,76 @@
+<!doctype html>
+<style type="text/css">
+    #mainPopup {
+        padding: 10px;
+        height: auto;
+        width: 300px;
+        font-family: Helvetica, Ubuntu, Arial, sans-serif;
+    }
+
+    h1 {
+        font-size: 2em;
+    }
+</style>
+<script src="jquery.js"></script>
+<script src="action.js"></script>
+
+<div id="mainPopup">
+    <h1 style="text-align: center;">Koffie Roulette</h1>
+
+    <div class="loggedin" style="display: none; text-align: center;">
+        <p style="display: block;">
+            Hoi <span class="name" style="font-weight: bold;"></span>
+        </p>
+
+        <form method="post" class="roulette_form">
+            <input type="hidden" name="item" value="Koffie">
+            <input type="hidden" name="what" value="halen">
+            <!--<p>-->
+            <!--Selecteer wie je uit wil nodigen voor de roulette<br/>-->
+            <!--</p>-->
+
+            <p style="display: none;">
+                <label>
+                    <input class="everybody" name="everybody" type="checkbox" value="1" checked> Iedereen deze server
+                </label>
+            </p>
+
+            <div class="specific">
+                <!--<p>-->
+                <!--<a class="select_all" href="#">Iedereen</a> - <a class="select_none" href="#">Niemand</a>-->
+                <!--</p>-->
+                <!---->
+                <!--<p class="participants" style="margin-left: 30%; width: 80%; text-align: left"></p>-->
+            </div>
+            <p class="start_roulette" style="display: block; text-align: center;">
+
+                <label>
+                    Reageertijd
+                    <select name="timeout">
+                        <option value="600">10 minuten</option>
+                        <option value="360" selected>5 minuten</option>
+                        <option value="120">2 minuten</option>
+                    </select>
+                </label>
+
+
+
+                <input type="button" value="Ik wil Koffie!">
+            </p>
+        </form>
+
+        <div class="roulettes_container" style="background-color: azure; padding: 12px;">
+            <h1>(Oude) Roulettes</h1>
+
+            <div class="roulettes"></div>
+        </div>
+    </div>
+    <div class="login" style="display: none;">
+        <p style="display: block; margin: auto auto; width: 60%;">
+            <a class="facebookConnect" href="#">
+                <img style="width: 100%;" src="img/fbconnect.png"/>
+            </a>
+        </p>
+    </div>
+
+</div>
