@@ -30,7 +30,13 @@ $(function () {
                 rouletteNum++;
                 if (rouletteObj.active)
                     active = true;
-                $(".roulettes").prepend($("<div class='open_roulette' style='text-align: left;' data-roulette='" + roulette_id + "'><a href='#' style='color: "+(rouletteObj.active?'#000':'#BBB')+"'>" + (rouletteObj.active?'Nu bezig! ':(rouletteObj.date + " : " + rouletteObj.item + " " + rouletteObj.action + " (door " + rouletteObj.initiator+")")) + "</a></div><div data-endtime='" + (rouletteObj.end_timestamp) + "' data-poll='" + (rouletteObj.active ? 1 : 0) + "' class='roulette_participants roulette_" + roulette_id + "' data-roulette='" + roulette_id + "' style='margin: 24px 0 12px 0; display: " + (rouletteObj.active ? "block" : "none") + ";'><h2 style='margin: 5px 0 0 0;'>" + rouletteObj.item + " " + rouletteObj.action + " <span style='font-size: 12px;'>(door " + rouletteObj.initiator + ")</span></h2><div class='end_time' style='padding: 12px;'></div> <div class='spin'></div><div style='text-align: left; margin: 12px 0 12px 0;' class='participants'></div></div>"));
+                $(".roulettes").prepend($("<div class='open_roulette' style='text-align: left;' data-roulette='" + roulette_id + "'><a href='#' style='color: "+(rouletteObj.active?'#000':'#BBB')+"'>" + (rouletteObj.active?'Nu bezig! ':(rouletteObj.date + " : " + rouletteObj.item + " " + rouletteObj.action + " (aanvraag van " + rouletteObj.initiator+")")) + "</a></div><div data-endtime='" + (rouletteObj.end_timestamp) + "' data-poll='" + (rouletteObj.active ? 1 : 0) + "' class='roulette_participants roulette_" + roulette_id + "' data-roulette='" + roulette_id + "' style='margin: 24px 0 12px 0; display: " + (rouletteObj.active ? "block" : "none") + ";'><h2 style='margin: 5px 0 0 0;'>" + rouletteObj.item + " " + rouletteObj.action + " <span style='font-size: 12px;'>(door " + rouletteObj.initiator + ")</span></h2><div class='end_time' style='padding: 12px 12px 0px 12px;'></div><div class='losers' style='padding: 0px 12px 12px 12px;'></div> <div class='spin'></div><div style='text-align: left; margin: 12px 0 12px 0;' class='participants'></div></div>"));
+                if (rouletteObj.loser.length) {
+                    $('.roulette_' + roulette_id + '>.losers').html("");
+                    $.each(rouletteObj.loser, function(loser_id, loser_obj) {
+                        $('.roulette_' + roulette_id + '>.losers').append(loser_obj.time+" <b>"+loser_obj.loser+"</b> was de verliezer ("+loser_obj.spinner+" draaide).<br/>");
+                    })
+                }
                 $('.roulette_' + roulette_id + '>.spin').append("<input type='button' class='spin_roulette' data-roulette='" + roulette_id + "' style='width: 100%;' value='Spin deze roulette!'/>");
                 fixParticipants(rouletteObj.reactions, roulette_id);
             });
@@ -68,13 +74,11 @@ $(function () {
         jQuery.getJSON('http://kantoorroulette.nl/api/rouletteserver', dataToSend, function (data) {
             setLocalStorage('data', data);
             check(data);
+            $('.roulette_participants:first').show();
         });
     }
 
     function fixParticipants(obj, roulette_id, rebuild) {
-        var htmlYes = "";
-        var htmlNo = "";
-        var htmlWaiting = "";
         rouletteNum = 0;
         if (rebuild)
             $('.roulette_' + roulette_id + '>.participants').html("");
@@ -161,7 +165,7 @@ $(function () {
         } else {
             $('.specific').slideDown();
         }
-    })
+    });
 
     $('.i_want_coffee_start').click(function () {
         initiateRoulette();
@@ -210,9 +214,12 @@ $(function () {
                 });
             }
         });
-        timerT = window.setTimeout(checkOpenParticipants, 7000);
+        if (timerP)
+            clearTimeout(timerP);
+        timerP = window.setTimeout(checkOpenParticipants, 7000);
     }
-
+var timerT;
+var timerP;
     function updateTimer() {
 
         $.each($(".roulette_participants:visible"), function (index, el) {
@@ -242,6 +249,7 @@ function initiateRoulette() {
             } else if (data.success) {
                 $(".i_want_coffee").hide();
                 $(".i_want_coffee_done").html(data.success).show();
+                start();
             }
             $('.i_want_coffee_toggle_container,.i_want_coffee_confirm').slideUp(400);
 
