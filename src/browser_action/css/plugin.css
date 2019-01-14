@@ -301,8 +301,9 @@ a.emoji {
     height: 150px;
 }
 
-.roulettes .fa {
-
+.roulettes {
+    overflow: auto;
+    height: 270px;
 }
 
 .wdt-emoji-popup {

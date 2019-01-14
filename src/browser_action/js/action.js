@@ -133,10 +133,10 @@ function updateRoulettes() {
 
         $('.changeGambleAfterYes').click(function () {
             console.log($(this).closest('[data-row-roulette]').data('row-roulette'));
-            setLocalStorage('changeParticipation', {response: false, gamble: 1, roulette_id: ($(this).closest('[data-row-roulette]').data('row-roulette'))});
+            setLocalStorage('changeParticipation', {reaction: false, gamble: 1, roulette_id: ($(this).closest('[data-row-roulette]').data('row-roulette'))});
         });
         $('.changeGambleAfterNo').click(function () {
-            setLocalStorage('changeParticipation', {response: false, gamble: 2, roulette_id: ($(this).closest('[data-row-roulette]').data('row-roulette'))});
+            setLocalStorage('changeParticipation', {reaction: false, gamble: 2, roulette_id: ($(this).closest('[data-row-roulette]').data('row-roulette'))});
         });
 
 
@@ -666,10 +666,10 @@ function currentRoulette(noEffect) {
             setLocalStorage('changeParticipation', {reaction: 2, roulette_id: current_roulette.roulette.roulette_id})
         });
         $('.changeGambleYes').click(function () {
-            setLocalStorage('changeParticipation', {gamble: 1, roulette_id: current_roulette.roulette.roulette_id});
+            setLocalStorage('changeParticipation', {reaction: 1, gamble: 1, roulette_id: current_roulette.roulette.roulette_id});
         });
         $('.changeGambleNo').click(function () {
-            setLocalStorage('changeParticipation', {gamble: 2, roulette_id: current_roulette.roulette.roulette_id});
+            setLocalStorage('changeParticipation', {reaction: 1, gamble: 2, roulette_id: current_roulette.roulette.roulette_id});
         });
         //$('.request_participants').html();
 
