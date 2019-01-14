@@ -27,6 +27,16 @@ function strip_tags(input, allowed) {
         });
 }
 
+window.addEventListener('storage', storageEventHandlerWindow, false);
+function storageEventHandlerWindow(evt) {
+    if (evt.key == "settings") {
+        settings = getLocalStorageObj('settings');
+        if (settings.balance) {
+            $('.balance').css('margin-left', '6px').html('(Saldo: '+settings.balance.toFixed(2)+' NLG)');
+        }
+    }
+}
+
 function createMessageHtml(obj) {
     text = "";
     if (obj.type == 'chat')

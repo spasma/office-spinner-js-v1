@@ -26,7 +26,6 @@ function isDevMode() {
 }
 
 chrome.idle.setDetectionInterval(300);
-
 chrome.idle.onStateChanged.addListener(function(newstate) {
     var time = new Date();
     if (newstate == 'locked' || newstate == 'idle') {
@@ -51,6 +50,23 @@ var defaultSettings = {
     harco_feature: false // feature bedacht door Harco Janssen van paperblue.nl
 };
 
+function updateData(data) {
+    if (!data) {
+        data = getLocalStorageObj('data');
+        dataToSend = {api_key: (data && data.api_key) ? data.api_key : "none"};
+        jQuery.getJSON('https://kantoorroulette.nl/apiv2/rouletteserver', dataToSend, function (data) {
+            setLocalStorage('data', data);
+            updateData(data);
+        });
+    } else if (data.user_id) {
+        if (data.balance !== undefined) {
+            gamble = true;
+            settings = getLocalStorageObj('settings');
+            settings.balance = data.balance;
+            setLocalStorage('settings', settings);
+        }
+    }
+}
 
 function storageEventHandler(evt) {
     if (evt.key == "chatSentQueue") {
@@ -202,14 +218,11 @@ if (settings === null) {
     }
     setLocalStorage('settings', settings);
 }
-
-
 function startRequest() {
     checkSettings();
     check();
     timerId = window.setTimeout(startRequest, pollInterval);
 }
-
 function setLocalStorage(name, obj) {
     localStorage.setItem(name, JSON.stringify(obj));
 }
@@ -217,19 +230,6 @@ function setLocalStorage(name, obj) {
 function getLocalStorageObj(name) {
     var retrievedObject = localStorage.getItem(name);
     return JSON.parse(retrievedObject);
-}
-
-
-function opsomming(array, orText) {
-    if (array.length > 1) {
-        var ret = "";
-        var lastItem = array.pop();
-        ret = array.join(", ");
-        return ret + " " + orText + " " + lastItem;
-    }
-    else {
-        return array[0];
-    }
 }
 var connectionTimeout = false;
 function check() {
@@ -322,7 +322,7 @@ function checkSocket() {
     connectionTimeout = false;
     serverInfo = getLocalStorageObj('data');
     pos = getLocalStorageObj('pos');
-    var query = 'apiKey=' + serverInfo.api_key + "&version=" + chrome.app.getDetails().version + '&' + pos + '&debug=' + (isDevMode() ? '1' : '0')
+    var query = 'apiKey=' + serverInfo.api_key + "&version=" + chrome.app.getDetails().version + '&' + pos + '&debug=' + (isDevMode() ? '1' : '0');
     if (serverInfo && serverInfo.user_id && !socket) {
         socket = io.connect('http://kantoorroulette.nl', {
             query: query,
@@ -337,24 +337,15 @@ function checkSocket() {
         });
         socket.on('connect', function () {
             check();
-            // addChatMessage({
-            //     message: 'Je bent nu verbonden!',
-            //     time: AddZero(new Date().getHours()) + ":" + AddZero(new Date().getMinutes())
-            // })
+            updateData();
         });
-        //socket.on('connect', function () {
-        //    addChatMessage({
-        //        message: 'Je bent opnieuw verbonden!',
-        //        time: AddZero(new Date().getHours()) + ":" + AddZero(new Date().getMinutes())
-        //    })
-        //});
-        socket.on('disconnect', function () {
-            addChatMessage({
-                type: 'disconnect',
-                message: 'Verbinding verbroken!',
-                time: AddZero(new Date().getHours()) + ":" + AddZero(new Date().getMinutes())
-            })
-        });
+        // socket.on('disconnect', function () {
+        //     addChatMessage({
+        //         type: 'disconnect',
+        //         message: 'Verbinding verbroken!',
+        //         time: AddZero(new Date().getHours()) + ":" + AddZero(new Date().getMinutes())
+        //     })
+        // });
         socket.on('update-server-info', function (obj) {
             setLocalStorage('roulettes', obj.roulettes);
             setLocalStorage('participants', obj.people);
@@ -404,6 +395,7 @@ function checkSocket() {
 
         socket.on('popupMessage', function (obj) {
             popupMessage(obj);
+            updateData();
         });
 
         socket.on('roulette_request', function (obj) {
