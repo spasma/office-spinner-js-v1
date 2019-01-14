@@ -83,7 +83,7 @@ function updateData(data) {
                 guldenRate = data.guldenRate;
             }
             $('.gamble').show();
-            $('.balance').css('margin-left', '6px').html('(Saldo: <a target="_blank" href="https://kantoorroulette.nl/account/gulden"><i class="guldensign"></i>'+data.balance.toFixed(2)+'</a>'+(guldenRate?'  = &euro;'+(guldenRate*data.balance.toFixed(2)).toFixed(2).replace('.', ',')+'':'')+')');
+            $('.balance').css('margin-left', '6px').html('(Saldo: <a target="_blank" href="https://kantoorroulette.nl/account/gulden"><i class="guldensign"></i>'+data.balance.toFixed(2)+'</a>'+(guldenRate?'  ≈ &euro;'+(guldenRate*data.balance.toFixed(2)).toFixed(2).replace('.', ',')+'':'')+')');
             settings = getLocalStorageObj('settings');
             settings.balance = data.balance;
             setLocalStorage('settings', settings);
