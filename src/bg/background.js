@@ -338,29 +338,39 @@ function check() {
                         }
                     });
                 } else if (rouletteObj.reaction == 1) {
-                    if (rouletteObj.active != true && rouletteInfoObj[roulette_id]['local'].active == true && !rouletteObj.loser.length && !rouletteObj.spinning.length) {
+                    if ((rouletteObj.active != true && rouletteInfoObj[roulette_id]['local'].active == true && !rouletteObj.loser.length && !rouletteObj.spinning.length)) {
 
                         var rNotification = "R" + roulette_id;
                         var aantalDeelnemers = 0;
                         var aantalAfhakers = 0;
+                        var afhakers = [];
                         $.each(rouletteObj.reactions, function (user_id, reactionObj) {
                             if (reactionObj.reaction == 1) {
                                 aantalDeelnemers++;
                             } else if (reactionObj.reaction == 2) {
                                 aantalAfhakers++;
+                                afhakers.push(reactionObj.name);
                             }
                         });
+                        var afhakersText = "";
+                        if (aantalAfhakers > 0) {
+                            if (aantalAfhakers == 1) {
+                                afhakersText = "De afhaker is "+afhakers[0];
+                            } else {
+                                afhakersText = "De afhaker zijn "+afhakers.join(",");
+                            }
+                        }
 
                         chrome.notifications.create(
                             rNotification, {
                                 type: "basic",
                                 iconUrl: "icons/icon48.png",
                                 title: "Kantoor Roulette!",
-                                message: "De aanvraag is verlopen, er zijn "+aantalDeelnemers+" deelnemers die ook " + rouletteObj.item + " willen. En er zijn "+aantalAfhakers+" afhakers..",
+                                message: "De aanvraag is verlopen, er zijn "+aantalDeelnemers+" deelnemers die ook " + rouletteObj.item + " willen. "+afhakersText,
                                 priority: 9
                             }
                         );
-                        chrome.tts.speak("De aanvraag is verlopen, er zijn "+aantalDeelnemers+" deelnemers die ook " + rouletteObj.item + " willen. En er zijn "+aantalAfhakers+" afhakers..", {
+                        chrome.tts.speak("De aanvraag is verlopen, er zijn "+aantalDeelnemers+" deelnemers die ook " + rouletteObj.item + " willen. "+afhakersText, {
                             'lang': 'nl-NL',
                             rate: 1
                         });

@@ -86,6 +86,7 @@ $(function () {
 
         $.each(obj, function (user_id, reactionObj) {
 
+            console.log(roulette_id);
             var extraHtml = "";
             if (user_id == self_id) {
                 extraHtml = "<span class='edit_part'>Ik doe: <a data-roulette='" + roulette_id + "' href='#' class='r_accept'><img src='img/accept.png'/></a> - <a data-roulette='" + roulette_id + "' href='#' class='r_decline'><img src='img/cancel.png'/></a></span>";
@@ -206,8 +207,7 @@ $(function () {
     function checkOpenParticipants() {
 
         $.each($(".roulette_participants:visible"), function (index, el) {
-
-            roulette_id = $(el).data('roulette');
+            var roulette_id = $(el).data('roulette');
             if ($(el).data('poll') == 1) {
                 $.getJSON('http://kantoorroulette.nl/api/getParticipants/roulette_id/' + roulette_id, function (data) {
                     fixParticipants(data, roulette_id);
