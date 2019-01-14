@@ -649,10 +649,10 @@ function currentRoulette(noEffect) {
         });
 
         $('.changeGambleYes').click(function () {
-            setLocalStorage('changeGamble', {gamble: 1, roulette_id: current_roulette.roulette.roulette_id});
+            setLocalStorage('changeParticipation', {reaction: 1, gamble: 1, roulette_id: current_roulette.roulette.roulette_id});
         });
         $('.changeGambleNo').click(function () {
-            setLocalStorage('changeGamble', {gamble: 2, roulette_id: current_roulette.roulette.roulette_id});
+            setLocalStorage('changeParticipation', {reaction: 1, gamble: 2, roulette_id: current_roulette.roulette.roulette_id});
         });
 
         //$('.request_participants').html();

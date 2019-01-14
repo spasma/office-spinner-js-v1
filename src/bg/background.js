@@ -58,15 +58,14 @@ function storageEventHandler(evt) {
     } else if (evt.key == "changeParticipation") {
         var partObj = getLocalStorageObj('changeParticipation');
         if (partObj.reaction && (partObj.reaction == "1" || partObj.reaction == "2")) {
-            socket.emit('request_response', partObj);
-            if (settings.gamble) {
+            if (settings.gamble && !partObj.gamble) {
                 if (settings.balance>=0.25) {
                     addChatMessage({
                         type: 'gamble_success',
                         message: 'Je doet mee met de Gulden Gamble met 0.25NLG!',
                         time: AddZero(new Date().getHours()) + ":" + AddZero(new Date().getMinutes())
                     });
-                    socket.emit('gamble_response', {gamble: 1});
+                    partObj.gamble = 1;
                 } else {
                     addChatMessage({
                         type: 'gamble_error',
@@ -74,36 +73,19 @@ function storageEventHandler(evt) {
                         time: AddZero(new Date().getHours()) + ":" + AddZero(new Date().getMinutes())
                     });
                     partObj.gamble = false;
-                    socket.emit('gamble_response', partObj);
                 }
             }
+            socket.emit('request_response', partObj);
         }
         setLocalStorage('changeParticipation', []);
-    } else if (evt.key == "changeGamble") {
-        var partObj = getLocalStorageObj('changeGamble');
-        if (partObj.gamble && (partObj.gamble == 1 || partObj.gamble == 2)) {
-            if (settings.balance>=0.25) {
-                addChatMessage({
-                    type: 'gamble_success',
-                    message: 'Je doet mee met de Gulden Gamble met 0.25NLG!',
-                    time: AddZero(new Date().getHours()) + ":" + AddZero(new Date().getMinutes())
-                });
-                socket.emit('gamble_response', partObj);
-            } else {
-                addChatMessage({
-                    type: 'gamble_error',
-                    message: 'Je hebt niet genoeg saldo om mee te doen met de Gulden Gamble.',
-                    time: AddZero(new Date().getHours()) + ":" + AddZero(new Date().getMinutes())
-                });
-                partObj.gamble = false;
-                socket.emit('gamble_response', partObj);
-            }
-        }
-        setLocalStorage('changeGamble', []);
     } else if (evt.key == "newRouletteRequest") {
         var sendObj = getLocalStorageObj('newRouletteRequest');
-        if (sendObj && sendObj.what)
+        if (sendObj && sendObj.what) {
+            if (settings.gamble) {
+                sendObj.gamble = 1;
+            }
             startRoulette(sendObj);
+        }
     } else if (evt.key == "settings") {
         checkSettings();
     }
@@ -322,7 +304,8 @@ function popupMessage(obj) {
                 if (obj.ttsText)
                     chrome.tts.speak(replaceName(obj.ttsText.toString()), {
                         'lang': 'nl-NL',
-                        rate: 1
+                        rate: 1,
+                        'enqueue': true
                     });
             }
         );
@@ -354,11 +337,10 @@ function checkSocket() {
         });
         socket.on('connect', function () {
             check();
-            addChatMessage({
-                type: 'connected',
-                message: 'Je bent nu verbonden!',
-                time: AddZero(new Date().getHours()) + ":" + AddZero(new Date().getMinutes())
-            })
+            // addChatMessage({
+            //     message: 'Je bent nu verbonden!',
+            //     time: AddZero(new Date().getHours()) + ":" + AddZero(new Date().getMinutes())
+            // })
         });
         //socket.on('connect', function () {
         //    addChatMessage({
