@@ -129,6 +129,17 @@ function updateRoulettes() {
                 }
             }
         });
+
+
+        $('.changeGambleAfterYes').click(function () {
+            console.log($(this).closest('[data-row-roulette]').data('row-roulette'));
+            setLocalStorage('changeParticipation', {response: false, gamble: 1, roulette_id: ($(this).closest('[data-row-roulette]').data('row-roulette'))});
+        });
+        $('.changeGambleAfterNo').click(function () {
+            setLocalStorage('changeParticipation', {response: false, gamble: 2, roulette_id: ($(this).closest('[data-row-roulette]').data('row-roulette'))});
+        });
+
+
         $('.roulettes .row:first .click-bar a').css('color', '#000');
         if ($('.roulette_participants:visible').length == 0 || $('.roulette_participants:visible').length > 1) {
             $('.roulette_participants').hide();
@@ -140,7 +151,7 @@ function rouletteContent(roulette) {
     var partHtml = "";
     var date = new Date(roulette.date);
     for (var user_id in roulette.participants) {
-        partHtml = partHtml + "<div data-response='" + roulette.participants[user_id].response + "' class='row columns participant part_" + user_id + "'><div class='large-8 medium-8 small-8 columns name'>" + roulette.participants[user_id].name + "</div><div class='large-3 medium-3 small-3 columns response'>" + responseHtmlDone[roulette.participants[user_id].response] + "</div><div "+(gamble?'':'style="display: none;"')+" class='gamble columns small-1'>"+(roulette.loser?gambleHtmlDone[roulette.participants[user_id].gamble]:gambleHtml[roulette.participants[user_id].gamble])+"</div></div>";
+        partHtml = partHtml + "<div data-response='" + roulette.participants[user_id].response + "' class='row columns participant part_" + user_id + "'><div class='large-8 medium-8 small-8 columns name'>" + roulette.participants[user_id].name + "</div><div class='large-3 medium-3 small-3 columns response'>" + responseHtmlDone[roulette.participants[user_id].response] + "</div><div "+(gamble?'':'style="display: none;"')+" class='gamble columns small-1'>"+(roulette.loser?gambleHtmlDone[roulette.participants[user_id].gamble]:((user_id == myId && roulette.participants[user_id].response == 1)?gambleHtmlSelfAfter[roulette.participants[user_id].gamble]:gambleHtml[roulette.participants[user_id].gamble]))+"</div></div>";
     }
 
     if ($('[data-row-roulette="' + roulette.roulette_id + '"]').length) {
@@ -546,6 +557,7 @@ var gambleHtml = {
     4: '<i data-tooltip title="deed mee met de Gulden-gamble, maar zat niet in de spin, betaalt dus niks" class="guldensign" style="color: rgba(236, 88, 64, 0.38); border: 1px solid rgba(236, 88, 64, 0.38);"></i>', // Gediskwalificeerd (betaalt niks, niet meegedaan in de spin)
     5: '<i data-tooltip title="deed mee met de Gulden-gamble, maar had geen saldo" class="guldensign" style="color: rgba(236, 88, 64, 0.38); border: 1px solid rgba(236, 88, 64, 0.38);"></i>' // Gediskwalificeerd
 };
+
 var gambleHtmlDone = {
     null: '',
     1: '<i data-tooltip title="deed niet mee met de roulette" class="guldensign" style="color: #999; border: 1px solid rgba(236, 88, 64, 0.38); padding: 2px 0 2px 4px; margin:0;"></i>',
@@ -559,6 +571,12 @@ var gambleHtmlSelf = {
     null:           '<a class="button changeGambleYes" style="background: #FFF; padding: 2px 0 2px 4px; margin:0;"><i class="guldensign " style="color: #999; cursor: pointer;"></i></a>',
     1:              '<a class="button changeGambleNo"  style="text-align: center; background: #FFF; border: 1px solid rgba(58, 219, 118, 0.38); padding: 2px 0 2px 4px; margin:0;"><i class="guldensign " style="color: #1169D6; cursor: pointer;"></i></a>',
     2:              '<a class="button changeGambleYes" style="background: #FFF; border: 1px solid rgba(236, 88, 64, 0.38); padding: 2px 0 2px 4px; margin:0;"><i class="guldensign " style="color: #999; cursor: pointer;"></i></a>'
+};
+var gambleHtmlSelfAfter = {
+    'undefined':    '<a class="button changeGambleAfterYes" style="background: #FFF; padding: 2px 0 2px 4px; margin:0;"><i class="guldensign" style="color: #999; cursor: pointer;"></i></a>',
+    null:           '<a class="button changeGambleAfterYes" style="background: #FFF; padding: 2px 0 2px 4px; margin:0;"><i class="guldensign " style="color: #999; cursor: pointer;"></i></a>',
+    1:              '<a class="button changeGambleAfterNo"  style="text-align: center; background: #FFF; border: 1px solid rgba(58, 219, 118, 0.38); padding: 2px 0 2px 4px; margin:0;"><i class="guldensign " style="color: #1169D6; cursor: pointer;"></i></a>',
+    2:              '<a class="button changeGambleAfterYes" style="background: #FFF; border: 1px solid rgba(236, 88, 64, 0.38); padding: 2px 0 2px 4px; margin:0;"><i class="guldensign " style="color: #999; cursor: pointer;"></i></a>'
 };
 
 function updateParticipants() {
@@ -647,14 +665,12 @@ function currentRoulette(noEffect) {
         $('button.changeNo').click(function () {
             setLocalStorage('changeParticipation', {reaction: 2, roulette_id: current_roulette.roulette.roulette_id})
         });
-
         $('.changeGambleYes').click(function () {
-            setLocalStorage('changeParticipation', {reaction: 1, gamble: 1, roulette_id: current_roulette.roulette.roulette_id});
+            setLocalStorage('changeParticipation', {gamble: 1, roulette_id: current_roulette.roulette.roulette_id});
         });
         $('.changeGambleNo').click(function () {
-            setLocalStorage('changeParticipation', {reaction: 1, gamble: 2, roulette_id: current_roulette.roulette.roulette_id});
+            setLocalStorage('changeParticipation', {gamble: 2, roulette_id: current_roulette.roulette.roulette_id});
         });
-
         //$('.request_participants').html();
 
     } else {

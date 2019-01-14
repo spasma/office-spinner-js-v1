@@ -57,8 +57,8 @@ function storageEventHandler(evt) {
         processNewChatMessages();
     } else if (evt.key == "changeParticipation") {
         var partObj = getLocalStorageObj('changeParticipation');
-        if (partObj.reaction && (partObj.reaction == "1" || partObj.reaction == "2")) {
-            if (settings.gamble && !partObj.gamble) {
+        if ((partObj.reaction && (partObj.reaction == "1" || partObj.reaction == "2")) || partObj.gamble) {
+            if ((settings.gamble && !partObj.gamble) || partObj.gamble == 1) {
                 if (settings.balance>=0.25) {
                     addChatMessage({
                         type: 'gamble_success',
@@ -448,11 +448,19 @@ function checkSocket() {
                             }
                             if (obj.type == 'reminder' && !rouletteInfoObj[roulette_id].reminderNotification) {
                                 var settings = getLocalStorageObj('settings');
-                                if (settings.speak_reminder)
-                                    chrome.tts.speak(replaceName(obj.ttsText), {
+                                if (settings.speak_reminder) {
+                                    var sendObj = {
                                         'lang': 'nl-NL',
-                                        rate: 1
-                                    });
+                                        rate: 1,
+                                        gamble: false
+                                    };
+                                    if (settings.gamble) {
+                                        if (settings.balance >= 0.25) {
+                                            sendObj.gamble = 1;
+                                        }
+                                    }
+                                    chrome.tts.speak(replaceName(obj.ttsText), sendObj);
+                                }
                                 rouletteInfoObj[roulette_id].reminderNotification = true;
                             }
 
@@ -468,10 +476,20 @@ function checkSocket() {
                                         'lang': 'nl-NL',
                                         rate: 1
                                     });
-                                socket.emit('request_response', {
+
+                                var sendObj = {
                                     roulette_id: roulette_id,
-                                    reaction: "1"
-                                });
+                                    reaction: "1",
+                                    gamble: false
+                                };
+
+                                if (settings.gamble) {
+                                    if (settings.balance >= 0.25) {
+                                        sendObj.gamble = 1;
+                                    }
+                                }
+
+                                socket.emit('request_response', sendObj);
                             });
                         }
                         if (buttonIndex === 1) {
