@@ -1,4 +1,7 @@
 var self_id = 0;
+var iwant_timer;
+var iwant_countdown;
+
 $(function () {
     function setLocalStorage(name, obj) {
         localStorage.setItem('data', JSON.stringify(obj));
@@ -20,14 +23,6 @@ $(function () {
             $('span.name').html(userObj.name);
             $('.login').hide();
             $('.loggedin').show();
-            //$.each(userObj.participants, function (user_id, user) {
-            //    var input = $('<label><input type="checkbox" name="user[' + user_id + ']" value="1"/> ' + user + '</label>');
-            //    //if (user_id !== self_id)
-            //    $('.currenly_available').append(input)
-            //});
-            //if ($('.participants').html() == "") {
-            //    $('.participants').html("Er is niemand beschikbaar");
-            //}
             var rouletteNum = 0;
             var active = false;
             $(".roulettes").html("");
@@ -35,24 +30,29 @@ $(function () {
                 rouletteNum++;
                 if (rouletteObj.active)
                     active = true;
-                $(".roulettes").prepend($("<div class='open_roulette' data-roulette='" + roulette_id + "' style='text-align: left;'><a href='#' style='color: #000'>" + rouletteObj.date + " : " + rouletteObj.item + " " + rouletteObj.action + " (door " + rouletteObj.initiator + ")</a></div><div data-endtime='" + (rouletteObj.end_timestamp) + "' data-poll='" + (rouletteObj.active ? 1 : 0) + "' class='roulette_participants roulette_" + roulette_id + "' data-roulette='" + roulette_id + "' style='display: " + (rouletteObj.active ? "block" : "none") + ";'><h2 style='margin: 5px 0 0 0;'>" + rouletteObj.item + " " + rouletteObj.action + " <span style='font-size: 12px;'>(door " + rouletteObj.initiator + ")</span></h2><div class='end_time' style='padding: 12px;'></div> <div class='spin'></div><div style='text-align: left;' class='participants'></div></div>"));
+                $(".roulettes").prepend($("<div class='open_roulette' style='text-align: left;' data-roulette='" + roulette_id + "'><a href='#' style='color: "+(rouletteObj.active?'#000':'#BBB')+"'>" + (rouletteObj.active?'Nu bezig! ':(rouletteObj.date + " : " + rouletteObj.item + " " + rouletteObj.action + " (door " + rouletteObj.initiator+")")) + "</a></div><div data-endtime='" + (rouletteObj.end_timestamp) + "' data-poll='" + (rouletteObj.active ? 1 : 0) + "' class='roulette_participants roulette_" + roulette_id + "' data-roulette='" + roulette_id + "' style='margin: 24px 0 12px 0; display: " + (rouletteObj.active ? "block" : "none") + ";'><h2 style='margin: 5px 0 0 0;'>" + rouletteObj.item + " " + rouletteObj.action + " <span style='font-size: 12px;'>(door " + rouletteObj.initiator + ")</span></h2><div class='end_time' style='padding: 12px;'></div> <div class='spin'></div><div style='text-align: left; margin: 12px 0 12px 0;' class='participants'></div></div>"));
                 $('.roulette_' + roulette_id + '>.spin').append("<input type='button' class='spin_roulette' data-roulette='" + roulette_id + "' style='width: 100%;' value='Spin deze roulette!'/>");
                 fixParticipants(rouletteObj.reactions, roulette_id);
             });
 
+            $(".currently_available").html("");
+            $.each(userObj.participants, function (user_id, user) {
+                $(".currently_available").append("- " + user + "<br/>");
+            });
+
             if (rouletteNum) {
-                if (active == true)
-                    $(".start_roulette").hide();
                 $(".roulettes_container").show();
                 $(".currenly_available_container").hide();
+
+                if (active == true) {
+                    $(".i_want_coffee_toggle_container").hide();
+                } else {
+                    $(".currenly_available_container").show();
+                }
             } else {
                 $(".start_roulette").show();
                 $(".roulettes_container").hide();
                 $(".currenly_available_container").show();
-                $(".currently_available").html("");
-                $.each(userObj.participants, function (user_id, user) {
-                    $(".currently_available").append("- "+user+"<br/>");
-                });
             }
 
         } else {
@@ -62,35 +62,50 @@ $(function () {
     }
 
     function start() {
-        jQuery.getJSON('http://kantoorroulette.nl/api/rouletteserver', function (data) {
+        var userObj = getLocalStorageObj('data');
+        dataToSend = {api_key: (userObj && userObj.api_key) ? userObj.api_key : "none"};
+
+        jQuery.getJSON('http://kantoorroulette.nl/api/rouletteserver', dataToSend, function (data) {
             setLocalStorage('data', data);
             check(data);
         });
     }
 
-    function fixParticipants(obj, roulette_id) {
+    function fixParticipants(obj, roulette_id, rebuild) {
         var htmlYes = "";
         var htmlNo = "";
         var htmlWaiting = "";
         rouletteNum = 0;
+        if (rebuild)
+            $('.roulette_' + roulette_id + '>.participants').html("");
+
+
         $.each(obj, function (user_id, reactionObj) {
 
             var extraHtml = "";
             if (user_id == self_id) {
-                extraHtml = "<span class='edit_part' style='display: none'>Ik doe: <a data-roulette='" + roulette_id + "' href='#' class='r_accept'><img src='img/accept.png'/></a> - <a data-roulette='" + roulette_id + "' href='#' class='r_decline'><img src='img/cancel.png'/></a></span>";
+                extraHtml = "<span class='edit_part'>Ik doe: <a data-roulette='" + roulette_id + "' href='#' class='r_accept'><img src='img/accept.png'/></a> - <a data-roulette='" + roulette_id + "' href='#' class='r_decline'><img src='img/cancel.png'/></a></span>";
             }
 
-            if (reactionObj.reaction == 2) {
-                htmlNo = htmlNo + "<span style='display: block; padding: 4px; height: auto; background-color: " + (rouletteNum % 2 ? '#FFF' : '#EEE') + "'>" + reactionObj.name + " <img style='float: right;' src='img/cancel.png'/>" + extraHtml + "</span>";
-            } else if (reactionObj.reaction == 1) {
-                htmlYes = htmlYes+  "<span style='display: block; padding: 4px; height: auto; background-color: " + (rouletteNum % 2 ? '#FFF' : '#EEE') + "'>" + reactionObj.name + " <img style='float: right;' src='img/accept.png'/>" + extraHtml + "</span>";
+            if ($('.roulette_' + roulette_id + '>.participants span[data-userid=' + user_id + ']').length == 0) {
+                if (reactionObj.reaction == 2) {
+                    $('.roulette_' + roulette_id + '>.participants').append("<span data-userid='" + user_id + "' style='display: block; padding: 4px; height: auto; background-color: " + (rouletteNum % 2 ? '#FFF' : '#EEE') + "'>" + reactionObj.name + " <img class='attendance' style='float: right;' src='img/cancel.png'/>" + extraHtml + "</span>");
+                } else if (reactionObj.reaction == 1) {
+                    $('.roulette_' + roulette_id + '>.participants').append("<span data-userid='" + user_id + "' style='display: block; padding: 4px; height: auto; background-color: " + (rouletteNum % 2 ? '#FFF' : '#EEE') + "'>" + reactionObj.name + " <img class='attendance' style='float: right;' src='img/accept.png'/>" + extraHtml + "</span>");
+                } else {
+                    $('.roulette_' + roulette_id + '>.participants').append("<span data-userid='" + user_id + "' style='display: block; padding: 4px; height: auto; background-color: " + (rouletteNum % 2 ? '#FFF' : '#EEE') + "'>" + reactionObj.name + " <img class='attendance' style='float: right;' src='img/help.png'/>" + extraHtml + "</span>");
+                }
             } else {
-                htmlWaiting = htmlWaiting+ "<span style='display: block; padding: 4px; height: auto; background-color: " + (rouletteNum % 2 ? '#FFF' : '#EEE') + "'>" + reactionObj.name + " <img style='float: right;' src='img/help.png'/>" + extraHtml + "</span>";
+                if (reactionObj.reaction == 2) {
+                    $('.roulette_' + roulette_id + '>.participants span[data-userid="' + user_id + '"] img.attendance').attr('src', 'img/cancel.png');
+                } else if (reactionObj.reaction == 1) {
+                    $('.roulette_' + roulette_id + '>.participants span[data-userid="' + user_id + '"] img.attendance').attr('src', 'img/accept.png');
+                } else {
+                    $('.roulette_' + roulette_id + '>.participants span[data-userid="' + user_id + '"] img.attendance').attr('src', 'img/help.png');
+                }
             }
             rouletteNum++;
         });
-
-        $('.roulette_' + roulette_id + '>.participants').html(htmlYes + htmlNo + htmlWaiting);
     }
 
     $('.roulettes').on('click', '.spin_roulette', function () {
@@ -104,8 +119,9 @@ $(function () {
         e.preventDefault();
         $(this).parent().html('Bezig..');
         $.post('http://kantoorroulette.nl/api/response', {roulette_id: roulette_id, reaction: "1"}, function (data) {
+            data = jQuery.parseJSON(data);
             if (data.success == 1) {
-                fixParticipants(data.participants, roulette_id);
+                fixParticipants(data.participants, roulette_id, true);
             }
         });
     });
@@ -113,8 +129,9 @@ $(function () {
         e.preventDefault();
         $(this).parent().html('Bezig..');
         $.post('http://kantoorroulette.nl/api/response', {roulette_id: roulette_id, reaction: "2"}, function (data) {
+            data = jQuery.parseJSON(data);
             if (data.success == 1) {
-                fixParticipants(data.participants, roulette_id);
+                fixParticipants(data.participants, roulette_id, true);
             }
         });
 
@@ -132,6 +149,11 @@ $(function () {
         chrome.tabs.create({url: newURL});
     });
 
+    $('.googleConnect').click(function () {
+        var newURL = "http://kantoorroulette.nl/goog/";
+        chrome.tabs.create({url: newURL});
+    });
+
     $('.everybody').change(function () {
         if ($(this).is(":checked")) {
             $('p.participants').find('input').prop('checked', false);
@@ -141,9 +163,41 @@ $(function () {
         }
     })
 
-    $('.start_roulette').click(function () {
+    $('.i_want_coffee_start').click(function () {
         initiateRoulette();
-    })
+    });
+    $('.i_want_coffee_toggle').click(function () {
+        $('.i_want_coffee_toggle_container').slideToggle(300);
+        if (iwant_timer)
+            clearTimeout(iwant_timer);
+
+        iwant_timer = setTimeout(function () {
+            $(".i_want_coffee_toggle_container").slideDown(100);
+            $(".i_want_coffee_confirm").slideUp(100);
+        }, 5000);
+
+        $('.i_want_coffee_close').attr('data-countdown', '6');
+        countDown();
+
+        $(".i_want_coffee_confirm").slideToggle(300);
+    });
+    $('.i_want_coffee_close').click(function () {
+        if (iwant_timer)
+            clearTimeout(iwant_timer);
+
+        $(".i_want_coffee_toggle_container").slideDown(100);
+        $(".i_want_coffee_confirm").slideUp(100);
+        iwant_timer = false;
+    });
+
+    function countDown() {
+        if (iwant_countdown)
+            clearTimeout(iwant_countdown);
+        if ($('input[data-countdown]').length && parseInt($('.i_want_coffee_close').attr('data-countdown')) > 0) {
+            $('.i_want_coffee_close').attr('data-countdown', parseInt($('.i_want_coffee_close').attr('data-countdown')) - 1).val("Nee ("+$('.i_want_coffee_close').attr('data-countdown')+")")
+            iwant_countdown = setTimeout(countDown, 1000);
+        }
+    }
 
     function checkOpenParticipants() {
 
@@ -152,22 +206,20 @@ $(function () {
             roulette_id = $(el).data('roulette');
             if ($(el).data('poll') == 1) {
                 $.getJSON('http://kantoorroulette.nl/api/getParticipants/roulette_id/' + roulette_id, function (data) {
-
                     fixParticipants(data, roulette_id);
-
                 });
             }
         });
-        timerT = window.setTimeout(checkOpenParticipants, 5000);
+        timerT = window.setTimeout(checkOpenParticipants, 7000);
     }
 
     function updateTimer() {
 
         $.each($(".roulette_participants:visible"), function (index, el) {
             if ($(el).data('endtime') > (Date.now() / 1000)) {
-                $(el).find('.edit_part').show();
                 $(el).find('.end_time').html(Math.floor($(el).data('endtime') - (Date.now() / 1000)) + " seconden");
             } else {
+                $(el).find('.edit_part').hide();
                 $(el).find('.end_time').html("Afgelopen");
             }
         });
@@ -182,16 +234,18 @@ $(function () {
 
 function initiateRoulette() {
     if ($('p.participants').find('input:checked').length > 1 || $('.everybody').is(":checked")) {
-            $.getJSON('http://kantoorroulette.nl/api/create_request', $('form.roulette_form').serialize(), function (data) {
-                if (data.error) {
-                    $(".i_want_coffee").hide();
-                    $(".i_want_coffee_error").html(data.error).show();
-                } else if (data.success) {
-                    $(".i_want_coffee").hide();
-                    $(".i_want_coffee_done").html(data.success).show();
+        $.getJSON('http://kantoorroulette.nl/api/create_request', $('form.roulette_form').serialize(), function (data) {
+            if (data.error) {
+                $(".i_want_coffee").hide();
+                $(".i_want_coffee_error").html(data.error).show();
+                $(".i_want_coffee_done").hide();
+            } else if (data.success) {
+                $(".i_want_coffee").hide();
+                $(".i_want_coffee_done").html(data.success).show();
+            }
+            $('.i_want_coffee_toggle_container,.i_want_coffee_confirm').slideUp(400);
 
-                }
-            });
+        });
     } else {
         console.log("te weinig deelnamers");
     }

@@ -35,7 +35,10 @@ function getLocalStorageObj(name) {
 }
 
 function check() {
-    jQuery.getJSON('http://kantoorroulette.nl/api/rouletteserver', function (data) {
+    var userObj = getLocalStorageObj('data');
+    dataToSend = {api_key: (userObj && userObj.api_key) ? userObj.api_key : "none"};
+
+    jQuery.getJSON('http://kantoorroulette.nl/api/rouletteserver', dataToSend, function (data) {
         setLocalStorage('data', data);
 
         if (data.roulettes) {
@@ -55,46 +58,58 @@ function check() {
                                 iconUrl: "icons/icon48.png"
                             },
                                 {
-                                    title: "Nee, stoor me komend half uur niet..",
+                                    title: "Nee, ik hoef niet..",
                                     iconUrl: "icons/icon48.png"
                                 }],
                             priority: 9
                         },
                         function () {
-                            chrome.tts.speak(rouletteObj.initiator + " wil " + rouletteObj.item + ".. jij ook?", {
+                            chrome.tts.speak(rouletteObj.initiator + " wil graag " + rouletteObj.item + ".. jij ook?", {
                                 'lang': 'nl-NL',
                                 rate: 1
                             });
                         }
                     );
-
-                    chrome.notifications.onButtonClicked.addListener(function(notificationId, buttonIndex) {
-                            if (buttonIndex === 0) {
-
-                                console.log("Ja. "+roulette_id);
-                                $.post('http://kantoorroulette.nl/api/response', { roulette_id: roulette_id, reaction: "1" }, function(data) {
-
-                                    console.log(data);
-
-                                });
-
-                                chrome.notifications.clear(notificationId, function() {});
-                            }
-                            if (buttonIndex === 1) {
-                                console.log("Nee."+roulette_id);
-                                $.post('http://kantoorroulette.nl/api/response', { roulette_id: roulette_id, reaction: "2" }, function(data) {
-
-                                    console.log(data);
-
-                                });
-
-
-                                chrome.notifications.clear(notificationId, function() {});
-                            }
+                    chrome.notifications.onClicked.addListener(function (notificationId, buttonIndex) {
+                        $.post('http://kantoorroulette.nl/api/response', {
+                            roulette_id: roulette_id,
+                            reaction: "2"
+                        }, function (data) {
+                        });
                     });
 
+                    chrome.notifications.onButtonClicked.addListener(function (notificationId, buttonIndex) {
+                        if (buttonIndex === 0) {
+                            chrome.tts.speak("Ja, ik ook.", {
+                                'lang': 'nl-NL',
+                                rate: 1
+                            });
+                            $.post('http://kantoorroulette.nl/api/response', {
+                                roulette_id: roulette_id,
+                                reaction: "1"
+                            }, function (data) {
+                            });
+
+                            chrome.notifications.clear(notificationId, function () {
+                            });
+                        }
+                        if (buttonIndex === 1) {
+                            chrome.tts.speak("Nee, ik niet.", {
+                                'lang': 'nl-NL',
+                                rate: 1
+                            });
+                            $.post('http://kantoorroulette.nl/api/response', {
+                                roulette_id: roulette_id,
+                                reaction: "2"
+                            }, function (data) {
+
+                            });
 
 
+                            chrome.notifications.clear(notificationId, function () {
+                            });
+                        }
+                    });
 
 
                 }
@@ -108,55 +123,4 @@ function check() {
     });
 }
 
-function show() {
-    //var time = /(..)(:..)/.exec(new Date());     // The prettyprinted time.
-    //var hour = time[1];               // The prettyprinted hour.
-    //new Notification("Wil je ook koffie?", {
-    //  icon: 'icons/icon48.png',
-    //  body: '{Naam} wil graag Koffie',
-    //  buttons: [{
-    //    title: "Yes, get me there",
-    //    iconUrl: "icons/icon48.png"
-    //  }, {
-    //    title: "Get out of my way",
-    //    iconUrl: "icons/icon48.png"
-    //  }]
-    //});
-
-//
-    //chrome.notifications.create(
-    //    'id1', {
-    //        type: 'basic',
-    //        iconUrl: 'image1.png',
-    //        title: 'Althe Frazon',
-    //        message: 'Hi, whats going on tonight?',
-    //        buttons: [{
-    //            title: 'Call',
-    //            iconUrl: 'call.png'
-    //        },
-    //            {
-    //                title: 'Send Email',
-    //                iconUrl: 'email.png'
-    //            }],
-    //        priority: 0
-    //    },
-    //    function () { /* Error checking goes here */
-    //    }
-    //);
-
-}
-
 startRequest();
-
-// Here we run a very simple test of the Graph API after login is
-// successful.  See statusChangeCallback() for when this call is made.
-//function testAPI() {
-//    console.log('Welcome!  Fetching your information.... ');
-//    FB.api('/me', function(response) {
-//        console.log('Successful login for: ' + response.name);
-//        document.getElementById('status').innerHTML =
-//            'Thanks for logging in, ' + response.name + '!';
-//    });
-//}
-
-//testAPI();

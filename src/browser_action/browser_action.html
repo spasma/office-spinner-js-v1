@@ -19,7 +19,7 @@
 
     <div class="loggedin" style="display: none; text-align: center;">
         <p style="display: block;">
-            Hoi <span class="name" style="font-weight: bold;"></span>
+            Hallo <span class="name" style="font-weight: bold;"></span>!
         </p>
 
         <form method="post" class="roulette_form">
@@ -53,7 +53,13 @@
                     </select>
                 </label>
 
-                <input class="i_want_coffee" type="button" value="Ik wil Koffie!">
+                <div class="i_want_coffee_toggle_container">
+                    <input class="i_want_coffee_toggle" type="button" value="Ik wil Koffie!">
+                </div>
+                <div class="i_want_coffee_confirm" style="display: none; padding: 12px;">
+                    Je staat op het punt om een koffie aanvraag te doen, weet je het zeker?<br/>
+                    <input class="i_want_coffee_start" type="button" value="Ja, verstuur uitnodiging!"> - <input class="i_want_coffee_close" type="button" value="Nee">
+                </div>
                 <span class="i_want_coffee_done" style="display: none;">Uw verzoek is verstuurd!</span>
                 <span class="i_want_coffee_error" style="display: none;">Er is nog een koffieverzoek bezig!</span>
                 <span class="currenly_available_container" style="display: block; margin-top: 12px; margin-left: 30%; text-align: left;">
@@ -73,6 +79,9 @@
         <p style="display: block; margin: auto auto; width: 60%;">
             <a class="facebookConnect" href="#">
                 <img style="width: 100%;" src="img/fbconnect.png"/>
+            </a>
+            <a class="googleConnect" href="#">
+                <img style="width: 100%;" src="img/google_signin_button.png"/>
             </a>
         </p>
     </div>
