@@ -284,7 +284,6 @@ function checkSocket() {
             path: '/socket.io',
             reconnection: true,
             timeout: 5000,
-            forceNew:true,
             reconnectionDelay: 10000
         });
         socket.on('new message', function (obj) {
@@ -308,7 +307,6 @@ function checkSocket() {
                 message: 'Verbinding verbroken!',
                 time: AddZero(new Date().getHours()) + ":" + AddZero(new Date().getMinutes())
             })
-            socket = false;
         });
         socket.on('update-server-info', function (obj) {
             setLocalStorage('roulettes', obj.roulettes);
