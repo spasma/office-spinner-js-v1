@@ -27,7 +27,6 @@ function strip_tags(input, allowed) {
         });
 }
 
-
 function createMessageHtml(obj) {
     text = "";
     if (obj.type == 'chat')
@@ -38,10 +37,6 @@ function createMessageHtml(obj) {
         text = (obj.time + "<span class='info dis-user'> <i class='fa fa-user-times'></i> " + strip_tags(obj.message) + "</span>");
     else if (obj.type == 'newroulette')
         text = (obj.time + "<span class='info new-roulette'> <i class='fa fa-plus-circle fa-spin'></i> " + strip_tags(obj.message) + "</span>");
-
-
-    //fa fa-plus-circle
-
 
     return '<div class="row collapse"><div class="small-12">' + wdtEmojiBundle.render(text) + '</div></div>';
 }
@@ -55,7 +50,6 @@ function updateData() {
         myId = data.user_id;
         $('.login').hide();
         updateParticipants();
-
 
         var uur = new Date().getHours();
         var tijdsstipText = "";
@@ -75,6 +69,7 @@ function updateData() {
         setLocalStorage('chatRecQueue', []);
 
         var chatMessagesObj = getLocalStorageObj('chatHistory');
+        console.log(chatMessagesObj);
         var chatMessages = [];
         if (chatMessagesObj !== null)
             $.each(chatMessagesObj, function (id, obj) {
@@ -150,7 +145,7 @@ function rouletteContent(roulette) {
 
     return "" +
         "<div class='roulette_participants roulette_" + roulette.roulette_id + "' data-roulette='" + roulette.roulette_id + "' style='display: none;'>" +
-        "<div class='losers text-center' style='padding: 0px 12px 12px 12px; font-size: 12px;'><div class='name'></div><div class='message'></div></div> " +
+        "<div class='losers text-center' style='padding-bottom: 4px; font-size: 12px;'><div class='name'></div><div class='message'></div></div> " +
         "<div class='spin text-center'><a class='button spin_roulette' data-roulette='" + roulette.roulette_id + "' data-spincode='" + roulette.spin_code + "' style='width: 100%;'>Spin deze roulette</a></div>" +
         "<div class='participants'>" + partHtml + "</div>" +
         "</div>";
@@ -303,10 +298,12 @@ $(function () {
             $(this).find('.fa').toggleClass('fa-cog fa-arrow-circle-left')
             $('.settings-container').slideDown(800);
             $('.chat').fadeOut(800);
+            $('.roulettes').fadeTo(800, 0);
             $('.loggedin').slideUp(800);
         } else {
             $('.settings-container').slideUp(800);
             $('.chat').fadeIn(800);
+            $('.roulettes').fadeTo(800, 1);
             $('.loggedin').slideDown(800);
 
             $(this).find('.fa').toggleClass('fa-cog fa-arrow-circle-left')

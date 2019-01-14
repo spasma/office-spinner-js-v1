@@ -117,10 +117,7 @@ setInterval(function () {
         }
 
     }
-
-
-
-    if (lastIconBadgeText != iconBadgeText) {
+    if ((lastIconBadgeText != iconBadgeText) || (iconBadgeText == "")) {
         chrome.browserAction.setBadgeText({text: iconBadgeText});
         lastIconBadgeText = iconBadgeText;
     }
