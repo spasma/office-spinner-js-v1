@@ -180,7 +180,6 @@ function countDownDisabled() {
     var secondsLeft = Math.floor((disabledPluginUntill - now) / 1000);
 
     if (secondsLeft > 0) {
-        console.log(secondsLeft);
         $("#DND .remaining").html("nog " + secondsLeft + " seconden.");
         disabledCd = setTimeout(function () {
             countDownDisabled();
@@ -248,16 +247,6 @@ $(function () {
         $('.advanced').slideDown();
     });
 
-    // $('.disable_coffee').click(function () {
-    //     var settings = getLocalStorageObj('settings');
-    //
-    //     // if (settings.disable_plugin !== false) {
-    //     //     settings.disable_plugin = false;
-    //     // }
-    //
-    //     setLocalStorage('settings', settings);
-    // });
-
     $('.dnd-menu a').click(function () {
         var settings = getLocalStorageObj('settings');
 
@@ -313,9 +302,11 @@ $(function () {
         if ($(this).find('.fa').hasClass('fa-cog')) {
             $(this).find('.fa').toggleClass('fa-cog fa-arrow-circle-left')
             $('.settings-container').slideDown(800);
+            $('.chat').fadeOut(800);
             $('.loggedin').slideUp(800);
         } else {
             $('.settings-container').slideUp(800);
+            $('.chat').fadeIn(800);
             $('.loggedin').slideDown(800);
 
             $(this).find('.fa').toggleClass('fa-cog fa-arrow-circle-left')
@@ -534,7 +525,6 @@ function currentRoulette(noEffect) {
     if (currentRouletteTimer)
         clearInterval(currentRouletteTimer);
     current_roulette = getLocalStorageObj('current_roulette');
-    console.log(current_roulette);
     if (!Array.isArray(current_roulette) && (current_roulette !== null && (current_roulette.length || typeof current_roulette == "object") && typeof current_roulette === 'object' && Object.keys(current_roulette.roulette).length !== 0)) {
         if (noEffect) {
             $('.roulette_request_container:visible, .roulettes:visible').hide();

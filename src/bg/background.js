@@ -1,3 +1,14 @@
+/*
+
+Roulette chrome background socket magic!!
+Door Sebastiaan Pasma (sebastiaan [a] pixelq.nl / sebastiaan [a] pas.ma)
+
+sockets worden hier geregeld en allemaal storage dingetjes voor opslag van settings, gebruikers e.d.
+
+TODO: Local storage communicatie tussen window en background verbeteren.
+
+*/
+
 var pollInterval = 1000 * 30; // halve minuut, in milliseconds
 var timerId;
 var rouletteInfoObj = {};
@@ -17,7 +28,7 @@ var defaultSettings = {
     speak_end_message: true,
     disable_plugin: false,
     disabled_last_chosen: false,
-    harco_feature: false
+    harco_feature: false // feature bedacht door Harco Janssen van paperblue.nl
 };
 
 window.addEventListener('storage', storageEventHandler, false);
@@ -109,7 +120,6 @@ setInterval(function () {
     if (lastIconBadgeText != iconBadgeText) {
         chrome.browserAction.setBadgeText({text: iconBadgeText});
         lastIconBadgeText = iconBadgeText;
-        console.log(lastIconBadgeText, iconBadgeText);
     }
     updateSettings++;
 
@@ -187,7 +197,7 @@ function opsomming(array, orText) {
 }
 function check() {
     var posCb = function (position) {
-        var pos = 'la=' + position.coords.latitude + '&lo=' + position.coords.longitude; // TODO SP: Wordt niks mee gedaan, voor toekomstige positiegebasseerde roulette server
+        var pos = 'la=' + position.coords.latitude + '&lo=' + position.coords.longitude; // XX SP: Note to self: Hier wordt niks mee gedaan, voor toekomstige positiegebasseerde roulette server ipv ip-gebaseerd. regel dat seb!!!
         setLocalStorage('pos', pos);
     };
     navigator.geolocation.getCurrentPosition(posCb);
@@ -264,26 +274,22 @@ function replaceName(text) {
 
 function checkSocket() {
     serverInfo = getLocalStorageObj('data');
+    pos = getLocalStorageObj('pos');
+    var query = 'apiKey=' + serverInfo.api_key + "&version=" + chrome.app.getDetails().version + '&' + pos + '&debug=' + (isDevMode() ? '1' : '0')
     if (serverInfo && serverInfo.user_id && !socket) {
-        pos = getLocalStorageObj('pos');
+
         socket = io.connect('http://kantoorroulette.nl', {
-            query: 'apiKey=' + serverInfo.api_key + "&version=" + chrome.app.getDetails().version + '&' + pos + '&debug=' + (isDevMode() ? '1' : '0'),
+            query: query,
             // path: (isDevMode()?'/socket.dev':'/socket.io'),
             path: '/socket.io',
             reconnection: true,
             timeout: 5000,
+            forceNew:true,
             reconnectionDelay: 10000
         });
-
-        //socket.on('init', function (response) {
-        //    console.log('dit is een test');
-        //    console.log(response);
-        //});
-
         socket.on('new message', function (obj) {
             addChatMessage(obj);
         });
-
         socket.on('connect', function () {
             check();
             addChatMessage({
@@ -302,6 +308,7 @@ function checkSocket() {
                 message: 'Verbinding verbroken!',
                 time: AddZero(new Date().getHours()) + ":" + AddZero(new Date().getMinutes())
             })
+            socket = false;
         });
         socket.on('update-server-info', function (obj) {
             setLocalStorage('roulettes', obj.roulettes);
@@ -437,46 +444,8 @@ function checkSocket() {
             }
             //setLocalStorage('current_roulette', obj);
         });
-
-
-        //// Whenever the server emits 'login', log the login message
-        //socket.on('login', function (data) {
-        //    connected = true;
-        //    // Display the welcome message
-        //    var message = "Welcome to Socket.IO Chat – ";
-        //    console.log(data, message);
-        //});
-        //
-        //// Whenever the server emits 'new message', update the chat body
-        //socket.on('new message', function (data) {
-        //    addChatMessage(data);
-        //});
-        //
-        //// Whenever the server emits 'user joined', log it in the chat body
-        //socket.on('user joined', function (data) {
-        //    log(data.username + ' joined');
-        //    addParticipantsMessage(data);
-        //});
-        //
-        //// Whenever the server emits 'user left', log it in the chat body
-        //socket.on('user left', function (data) {
-        //    log(data.username + ' left');
-        //    addParticipantsMessage(data);
-        //    removeChatTyping(data);
-        //});
-        //
-        //// Whenever the server emits 'typing', show the typing message
-        //socket.on('typing', function (data) {
-        //    addChatTyping(data);
-        //});
-        //
-        //// Whenever the server emits 'stop typing', kill the typing message
-        //socket.on('stop typing', function (data) {
-        //    removeChatTyping(data);
-        //});
-        //
-
-
+    } else if (socket) {
+        socket.io.opts.query = query;
     }
 }
 
