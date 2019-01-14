@@ -7,6 +7,8 @@
     <link rel="stylesheet" type="text/css" href="css/font-awesome.min.css">
     <link rel="stylesheet" type="text/css" href="css/plugin.css">
     <link rel="stylesheet" type="text/css" href="css/wdt-emoji-bundle.css">
+    <link rel="stylesheet" type="text/css" href="css/guldensign.css">
+
     <script src="js/jquery.js"></script>
     <script src="js/foundation.min.js"></script>
     <script src="js/emoji.min.js"></script>
@@ -46,10 +48,10 @@
             </div>
         </header>
         <div class="spinner-container">
-        <div class="spinner" style="display: none;">
-            <h3 id="status_label" style="display: none;">loading...</h3>
-            <canvas id="drawing_canvas" style="width: 400px;"></canvas>
-        </div>
+            <div class="spinner" style="display: none;">
+                <h3 id="status_label" style="display: none;">loading...</h3>
+                <canvas id="drawing_canvas" style="width: 400px;"></canvas>
+            </div>
         </div>
         <div class="login" style="display: none;">
             <div class="row login-container">
@@ -116,23 +118,28 @@
                         Harco Feature
                         <i class="fa fa-question-circle" title="Spreek de roulette-berichten uit als deze gedraaid wordt door iemand anders." data-tooltip></i>
                     </label>
+                    <label class="gamble" style="display: none;">
+                        <input type="checkbox" data-setting="gulden_gamle">
+                        Standaard Gulden Gamble aan
+                        <i class="fa fa-question-circle" title="Zet 0.5NLG in per spin, de verliezer die deze functie aan heeft zal de inzet van andere spelers die ook meedoen met deze functie ontvangen." data-tooltip></i>
+                    </label>
                 </div>
             </div>
         </div>
         <div class="loggedin" style="display: none;">
             <div class="row helloUser">
                 <div class="large-12 medium-12 small-12 columns text-center dagWens-container">
-                    <span class="dagWens"></span> <span class="name" style="font-weight: bold;"></span>!
+                    <span class="dagWens"></span> <span class="name" style="font-weight: bold;"></span>!<span class="balance"></span>
                 </div>
             </div>
-            <div class="row currently-container no-select">
-                <div class="large-12 medium-12 small-12">
-                    <div>Momenteel aanwezig:</div>
-                    <div class="currently-available">
-                        <span class='radius label warning'><i class="fa fa-spin fa-spinner"></i> Momentje.. Bezig met verbinden..</span>
-                    </div>
-                </div>
-            </div>
+            <!--<div class="row currently-container no-select">-->
+                <!--<div class="large-12 medium-12 small-12">-->
+                    <!--<div>Momenteel aanwezig:</div>-->
+                    <!--<div class="currently-available">-->
+                        <!--<span class='radius label warning'><i class="fa fa-spin fa-spinner"></i> Momentje.. Bezig met verbinden..</span>-->
+                    <!--</div>-->
+                <!--</div>-->
+            <!--</div>-->
         </div>
         <div id="content" class="row">
             <div class="large-12 medium-12 small-12 columns roulette_request_container" style="display: none;">
@@ -197,7 +204,20 @@
         <div class="row roulettes columns" style="display: none;"></div>
         <div class="chat-spacer"></div>
         <div class="row chat columns">
-            <div class="messages-container"></div>
+            <div class="small-12">
+                <div class="row">
+                    <div class="small-3 columns">
+                        <div class="currently">
+                        <div class="currently-available"></div>
+                        <div class="currently-idle"></div>
+                        <div class="currently-disabled"></div>
+                        </div>
+                    </div>
+                    <div class="small-9 columns">
+                        <div class="messages-container"></div>
+                    </div>
+                </div>
+            </div>
             <div class="small-12">
                 <input type="text" class="newMessage form-control wdt-emoji-bundle-enabled" placeholder="Typ een chatbericht.."/>
             </div>

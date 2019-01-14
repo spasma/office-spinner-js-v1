@@ -1,7 +1,7 @@
 
 body, html {
     height: auto;
-    font-size: 12px;
+    font-size: 13px;
     -webkit-font-smoothing: antialiased;
     /*-moz-osx-font-smoothing: grayscale;*/
 }
@@ -11,13 +11,13 @@ body, html {
     margin: 0px;
     padding: 0px;
     height: 600px;
-    width: 500px;
+    width: 600px;
     font-family: Helvetica, Ubuntu, Arial, sans-serif;
     cursor: default;
 }
 
 h1 {
-    font-size: 1.2em;
+    font-size: 1rem;
     font-family: "open sans", Helvetica, sans-serif;
     margin: 4px 0;
     line-height: 40px;
@@ -37,7 +37,7 @@ h1 {
 
 
 .logo img {
-    height: 32px;
+    height: 40px;
     right: 0;
 }
 
@@ -76,38 +76,66 @@ header .logo {
     display: block;
     text-align: center;
 }
+/*.currently-available {*/
+    /*margin-top: 4px;*/
+/*}*/
 
-.currently-available {
-    margin-top: 4px;
+.currently {
+    border: #cecece solid 1px;
+    height: 150px;
+    overflow: auto;
 }
-.dagWens-container, .currently-container {
+
+/*.currently-available {*/
+    /*height: 130px;*/
+    /*overflow: auto;*/
+    /*font-size: 1rem;*/
+/*}*/
+.currently span {
+    width: 100%;
+    /*margin-right: 2px;*/
+    /*margin-bottom: 2px;*/
+    font-size: 13px;
+    color: #333;
+    background-color: #FFF;
+    border-bottom: 1px solid #EEE;
 }
-.currently-available span {
-    margin-right: 2px;
-    margin-bottom: 2px;
-    font-size: 12px;
-    background-color: #2ab136;
-}
-.currently-available span.idle {
+.currently span.idle {
     background-color: #FFF;
     color: #333;
-    border: 1px solid #CCC;
 }
-.currently-available span.disabled {
-    background-color: #e3c3ae;
+
+/*.currently-available span {*/
+    /*margin-right: 2px;*/
+    /*margin-bottom: 2px;*/
+    /*font-size: 12px;*/
+    /*background-color: #2ab136;*/
+/*}*/
+/*.currently-available span.idle {*/
+    /*background-color: #FFF;*/
+    /*color: #333;*/
+    /*border: 1px solid #CCC;*/
+/*}*/
+.currently span.disabled {
+    text-decoration: line-through   ;
+    /*background-color: #e3c3ae;*/
 }
 
 
-.currently-available span .status {
-    height: 10px;
-    width: 10px;
+.currently span .status {
+    height: 7px;
+    width: 7px;
     display: inline-flex;
     border-radius: 5px;
+    margin-right: 6px;
 }
-.currently-available span .idle {
+.currently span .idle {
     background: #f9ef67;
 }
-.currently-available span .disabled {
+.currently span .online {
+    background: #3adb76;
+}
+.currently span .disabled {
     background: #db4437;
 }
 
@@ -145,7 +173,7 @@ header .logo {
 }
 .messages-container {
     border: #cecece solid 1px;
-    height: 130px;
+    height: 150px;
     overflow: auto;
     margin-bottom: 2px;
     font-size: 1rem;
@@ -157,7 +185,7 @@ header .logo {
 input.newMessage {
     margin: 0;
     padding: 0px 5px !important;
-    font-size: 1.2rem;
+    font-size: 1rem;
     height: 22px;
     border: 0 !important;
     /*border-top: 1px #cecece solid !important;*/
@@ -218,6 +246,7 @@ a.emoji {
     font-size: 1rem;
     /*height: 1.4rem;*/
     bottom: 0px;
+
     border: 1px #cecece solid !important;
     outline-offset: 0;
     box-shadow: none !important;
@@ -237,7 +266,7 @@ a.emoji {
 }
 .settings-toggle-container a {
     color: #fff;
-    font-size: 1.5em;
+    font-size: 1.5rem;
 }
 :focus {
     outline: none !important;

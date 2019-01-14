@@ -15,6 +15,11 @@ var rouletteInfoObj = {};
 var socket = false;
 var serverInfo;
 var lastState = 'active';
+var lastIconBadgeText = "";
+var updateSettings = 0;
+var disabledCd = false;
+var secondsLeftDisabled = false;
+
 
 function isDevMode() {
     return false; // !('update_url' in chrome.runtime.getManifest());
@@ -54,6 +59,12 @@ function storageEventHandler(evt) {
             socket.emit('request_response', partObj);
         }
         setLocalStorage('changeParticipation', []);
+    } else if (evt.key == "changeGamble") {
+        var partObj = getLocalStorageObj('changeGamble');
+        if (partObj.gamble && (partObj.gamble == 1 || partObj.gamble == 2)) {
+            socket.emit('gamble_response', partObj);
+        }
+        setLocalStorage('changeGamble', []);
     } else if (evt.key == "newRouletteRequest") {
         var sendObj = getLocalStorageObj('newRouletteRequest');
         if (sendObj && sendObj.what)
@@ -65,8 +76,7 @@ function storageEventHandler(evt) {
 window.addEventListener('storage', storageEventHandler, false);
 
 
-var disabledCd = false;
-var secondsLeftDisabled = false;
+
 function countDownDisabled() {
     var settings = getLocalStorageObj('settings');
     if (disabledCd)
@@ -99,10 +109,7 @@ function startRoulette(sendObj) {
     socket.emit('newroulette', sendObj);
     setLocalStorage('newRouletteRequest', []);
 }
-var fixIconTimer = false;
-var lastIconBadgeText = "";
 
-var updateSettings = 0;
 
 setInterval(function () {
     var iconBadgeText = "";
@@ -472,9 +479,6 @@ function checkSocket() {
     }
 }
 
-//function addChatMessage(data) {
-//    console.log(data);
-//}
 function addParticipantsMessage(data) {
 }
 function removeChatTyping(data) {
