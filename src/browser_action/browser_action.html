@@ -119,9 +119,9 @@
                         <i class="fa fa-question-circle" title="Spreek de roulette-berichten uit als deze gedraaid wordt door iemand anders." data-tooltip></i>
                     </label>
                     <label class="gamble" style="display: none;">
-                        <input type="checkbox" data-setting="gulden_gamle">
+                        <input type="checkbox" data-setting="gamble">
                         Standaard Gulden Gamble aan
-                        <i class="fa fa-question-circle" title="Zet 0.5NLG in per spin, de verliezer die deze functie aan heeft zal de inzet van andere spelers die ook meedoen met deze functie ontvangen." data-tooltip></i>
+                        <i class="fa fa-question-circle" title="Zet 0.25NLG in per spin, de verliezer die deze functie aan heeft zal de inzet van andere spelers die ook meedoen met deze functie ontvangen." data-tooltip></i>
                     </label>
                 </div>
             </div>
@@ -208,7 +208,11 @@
                 <div class="row">
                     <div class="small-3 columns">
                         <div class="currently">
-                        <div class="currently-available"></div>
+                        <div class="currently-available">
+                            <div style="display: block;" class="connecting text-center"><span class='radius label warning'>
+                                <i class="fa fa-spin fa-spinner"></i><br/>Bezig met verbinden..</span>
+                            </div>
+                        </div>
                         <div class="currently-idle"></div>
                         <div class="currently-disabled"></div>
                         </div>

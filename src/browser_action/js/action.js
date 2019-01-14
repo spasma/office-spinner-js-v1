@@ -33,6 +33,10 @@ function createMessageHtml(obj) {
         text = (obj.time + " <b>" + obj.userName + "</b>:" + " " + strip_tags(obj.message));
     else if (obj.type == 'connected')
         text = (obj.time + "<span class='info new-user'> <i class='fa fa-user-plus'></i> " + strip_tags(obj.message) + "</span>");
+    else if (obj.type == 'gamble_success' && gamble)
+        text = (obj.time + "<span class='info gamble'> <i class='guldensign success'></i> " + strip_tags(obj.message) + "</span>");
+    else if (obj.type == 'gamble_error' && gamble)
+        text = (obj.time + "<span class='info gamble'> <i class='guldensign error'></i> " + strip_tags(obj.message) + "</span>");
     else if (obj.type == 'disconnected')
         text = (obj.time + "<span class='info dis-user'> <i class='fa fa-user-times'></i> " + strip_tags(obj.message) + "</span>");
     else if (obj.type == 'newroulette')
@@ -72,14 +76,17 @@ function updateData(data) {
         $("span.name").html(data.name);
         if (data.balance !== undefined) {
             gamble = true;
-            $('.balance').css('margin-left', '6px').html('(Balans: '+data.balance.toFixed(2)+' NLG)');
+            $('.gamble').show();
+            $('.balance').css('margin-left', '6px').html('(Saldo: '+data.balance.toFixed(2)+' NLG)');
+            settings = getLocalStorageObj('settings');
+            settings.balance = data.balance;
+            setLocalStorage('settings', settings);
         }
         updateRoulettes();
         currentRoulette(true);
         setLocalStorage('chatRecQueue', []);
 
         var chatMessagesObj = getLocalStorageObj('chatHistory');
-        console.log(chatMessagesObj);
         var chatMessages = [];
         if (chatMessagesObj !== null)
             $.each(chatMessagesObj, function (id, obj) {
@@ -109,7 +116,6 @@ function updateRoulettes() {
                     rouletteContent(roulette);
                     // $('[data-row-roulette="' + roulette.roulette_id + '"] .content').html(newContent);
                 } else {
-                    console.log(roulette);
                     $('.roulettes').prepend("<div class='row' data-row-roulette='" + roulette.roulette_id + "'>" +
                         "<div class='small-12 columns'>" +
                         "<div class='click-bar open_roulette' data-roulette='" + roulette.roulette_id + "' style='text-align: left;'>" +
@@ -134,7 +140,7 @@ function rouletteContent(roulette) {
     var partHtml = "";
     var date = new Date(roulette.date);
     for (var user_id in roulette.participants) {
-        partHtml = partHtml + "<div data-response='" + roulette.participants[user_id].response + "' class='row columns participant part_" + user_id + "'><div class='large-8 medium-8 small-8 columns name'>" + roulette.participants[user_id].name + "</div><div class='large-3 medium-3 small-3 columns response'>" + responseHtmlDone[roulette.participants[user_id].response] + "</div><div "+(gamble?'':'style="display: none;"')+" class='gamble columns small-1'>"+(gambleHtml[roulette.participants[user_id].gamble])+"</div></div>";
+        partHtml = partHtml + "<div data-response='" + roulette.participants[user_id].response + "' class='row columns participant part_" + user_id + "'><div class='large-8 medium-8 small-8 columns name'>" + roulette.participants[user_id].name + "</div><div class='large-3 medium-3 small-3 columns response'>" + responseHtmlDone[roulette.participants[user_id].response] + "</div><div "+(gamble?'':'style="display: none;"')+" class='gamble columns small-1'>"+(roulette.loser?gambleHtmlDone[roulette.participants[user_id].gamble]:gambleHtml[roulette.participants[user_id].gamble])+"</div></div>";
     }
 
     if ($('[data-row-roulette="' + roulette.roulette_id + '"]').length) {
@@ -147,7 +153,6 @@ function rouletteContent(roulette) {
             }
             $('[data-row-roulette="' + roulette.roulette_id + '"] .spin_roulette').hide();
         } else {
-            console.log(roulette);
             $('[data-row-roulette="' + roulette.roulette_id + '"] .losers').html('Nog geen verliezer bepaald');
             if ((Date.now() - date) < 600) {
                 $('.i_want_coffee_toggle').css('opacity', '0.2').css('background-color', '#CCC').css('color', '#333');
@@ -536,16 +541,24 @@ var gambleHtml = {
     null: '',
     'undefined': '<i data-tooltip title="deed niet mee met de Gulden-gamble" class="guldensign" style="color: #999;"></i>',
     1: '<i data-tooltip title="doet mee met de Gulden-gamble" class="guldensign" style="color: #1169D6;  border: 1px solid rgba(58, 219, 118, 0.38); padding: 2px 0 2px 4px; margin:0;"></i>',
-    2: '<i data-tooltip title="deed niet mee met de Gulden-gamble" class="guldensign" style="color: #999; border: 1px solid #ec5840;"></i>',
+    2: '<i data-tooltip title="deed niet mee met de Gulden-gamble" class="guldensign" style="color: #999; border: 1px solid rgba(236, 88, 64, 0.38); padding: 2px 0 2px 4px; margin:0;"></i>',
     3: '<i data-tooltip title="deed mee met de Gulden-gamble en zat in de spin" class="guldensign" style="color: #1169D6; border: 1px solid rgba(58, 219, 118, 0.38); padding: 2px 0 2px 4px; margin:0;"></i>', // Deed echt mee
-    4: '<i data-tooltip title="deed mee met de Gulden-gamble, maar zat niet in de spin, betaalt dus niks" class="guldensign" style="color: #ec5840; border: 1px solid #ec5840;"></i>', // Gediskwalificeerd (betaalt niks, niet meegedaan in de spin)
-    5: '<i data-tooltip title="deed mee met de Gulden-gamble, maar had geen saldo" class="guldensign" style="color: #ec5840; border: 1px solid #ec5840;"></i>' // Gediskwalificeerd
+    4: '<i data-tooltip title="deed mee met de Gulden-gamble, maar zat niet in de spin, betaalt dus niks" class="guldensign" style="color: rgba(236, 88, 64, 0.38); border: 1px solid rgba(236, 88, 64, 0.38);"></i>', // Gediskwalificeerd (betaalt niks, niet meegedaan in de spin)
+    5: '<i data-tooltip title="deed mee met de Gulden-gamble, maar had geen saldo" class="guldensign" style="color: rgba(236, 88, 64, 0.38); border: 1px solid rgba(236, 88, 64, 0.38);"></i>' // Gediskwalificeerd
+};
+var gambleHtmlDone = {
+    null: '',
+    1: '<i data-tooltip title="deed niet mee met de roulette" class="guldensign" style="color: #999; border: 1px solid rgba(236, 88, 64, 0.38); padding: 2px 0 2px 4px; margin:0;"></i>',
+    2: '<i data-tooltip title="deed niet mee met de Gulden-gamble" class="guldensign" style="color: #999; border: 1px solid rgba(236, 88, 64, 0.38); padding: 2px 0 2px 4px; margin:0;"></i>',
+    3: '<i data-tooltip title="deed mee met de Gulden-gamble en zat in de spin" class="guldensign" style="color: #1169D6; border: 1px solid rgba(58, 219, 118, 0.38); padding: 2px 0 2px 4px; margin:0;"></i>', // Deed echt mee
+    4: '<i data-tooltip title="deed mee met de Gulden-gamble, maar zat niet in de spin, betaalt dus niks" class="guldensign" style="color: rgba(236, 88, 64, 0.38); border: 1px solid rgba(236, 88, 64, 0.38);"></i>', // Gediskwalificeerd (betaalt niks, niet meegedaan in de spin)
+    5: '<i data-tooltip title="deed mee met de Gulden-gamble, maar had geen saldo" class="guldensign" style="color: rgba(236, 88, 64, 0.38); border: 1px solid rgba(236, 88, 64, 0.38);"></i>' // Gediskwalificeerd
 };
 var gambleHtmlSelf = {
     'undefined':    '<a class="button changeGambleYes" style="background: #FFF; padding: 2px 0 2px 4px; margin:0;"><i class="guldensign" style="color: #999; cursor: pointer;"></i></a>',
     null:           '<a class="button changeGambleYes" style="background: #FFF; padding: 2px 0 2px 4px; margin:0;"><i class="guldensign " style="color: #999; cursor: pointer;"></i></a>',
     1:              '<a class="button changeGambleNo"  style="text-align: center; background: #FFF; border: 1px solid rgba(58, 219, 118, 0.38); padding: 2px 0 2px 4px; margin:0;"><i class="guldensign " style="color: #1169D6; cursor: pointer;"></i></a>',
-    2:              '<a class="button changeGambleYes" style="background: #FFF; border: 1px solid #ec5840; padding: 2px 0 2px 4px; margin:0;"><i class="guldensign " style="color: #999; cursor: pointer;"></i></a>'
+    2:              '<a class="button changeGambleYes" style="background: #FFF; border: 1px solid rgba(236, 88, 64, 0.38); padding: 2px 0 2px 4px; margin:0;"><i class="guldensign " style="color: #999; cursor: pointer;"></i></a>'
 };
 
 function updateParticipants() {
@@ -636,10 +649,10 @@ function currentRoulette(noEffect) {
         });
 
         $('.changeGambleYes').click(function () {
-            setLocalStorage('changeGamble', {gamble: 1});
+            setLocalStorage('changeGamble', {gamble: 1, roulette_id: current_roulette.roulette.roulette_id});
         });
         $('.changeGambleNo').click(function () {
-            setLocalStorage('changeGamble', {gamble: 2});
+            setLocalStorage('changeGamble', {gamble: 2, roulette_id: current_roulette.roulette.roulette_id});
         });
 
         //$('.request_participants').html();

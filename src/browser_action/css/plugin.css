@@ -188,9 +188,11 @@ input.newMessage {
     font-size: 1rem;
     height: 22px;
     border: 0 !important;
-    /*border-top: 1px #cecece solid !important;*/
+    border-top: 1px rgba(206, 206, 206, 0.63) solid !important;
     outline-offset: 0;
     box-shadow: none !important;
+    border-left: 1px #cecece solid !important;
+    border-right: 1px #cecece solid !important;
 }
 input.newMessage:focus {
     border: 0px;
@@ -215,13 +217,19 @@ a.emoji {
     font-size: 10px;
 }
 .messages-container .info.new-user .fa {
-    color: lawngreen;
+    color: #3adb76;
 }
 .messages-container .info.dis-user .fa {
     color: firebrick;
 }
 .messages-container .info.new-roulette .fa {
     color: #147cc0;
+}
+.messages-container .info.gamble .guldensign.error {
+    color: firebrick;
+}
+.messages-container .info.gamble .guldensign.success {
+    color: #1169D6;
 }
 
 .i_want_coffee_done,.i_want_coffee_error,.i_want_coffee_load {
@@ -303,7 +311,7 @@ a.emoji {
 }
 .wdt-emoji-picker {
     position: absolute;
-    bottom: 2px !important;
+    bottom: 0px !important;
     width: 17px !important;
     right: 15px !important;
 }

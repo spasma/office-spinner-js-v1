@@ -46,6 +46,8 @@ var defaultSettings = {
     speak_end_message: true,
     disable_plugin: false,
     disabled_last_chosen: false,
+    gamble: false,
+    balance: 0,
     harco_feature: false // feature bedacht door Harco Janssen van paperblue.nl
 };
 
@@ -57,12 +59,45 @@ function storageEventHandler(evt) {
         var partObj = getLocalStorageObj('changeParticipation');
         if (partObj.reaction && (partObj.reaction == "1" || partObj.reaction == "2")) {
             socket.emit('request_response', partObj);
+            if (settings.gamble) {
+                if (settings.balance>=0.25) {
+                    addChatMessage({
+                        type: 'gamble_success',
+                        message: 'Je doet mee met de Gulden Gamble met 0.25NLG!',
+                        time: AddZero(new Date().getHours()) + ":" + AddZero(new Date().getMinutes())
+                    });
+                    socket.emit('gamble_response', {gamble: 1});
+                } else {
+                    addChatMessage({
+                        type: 'gamble_error',
+                        message: 'Je hebt niet genoeg saldo om mee te doen met de Gulden Gamble.',
+                        time: AddZero(new Date().getHours()) + ":" + AddZero(new Date().getMinutes())
+                    });
+                    partObj.gamble = false;
+                    socket.emit('gamble_response', partObj);
+                }
+            }
         }
         setLocalStorage('changeParticipation', []);
     } else if (evt.key == "changeGamble") {
         var partObj = getLocalStorageObj('changeGamble');
         if (partObj.gamble && (partObj.gamble == 1 || partObj.gamble == 2)) {
-            socket.emit('gamble_response', partObj);
+            if (settings.balance>=0.25) {
+                addChatMessage({
+                    type: 'gamble_success',
+                    message: 'Je doet mee met de Gulden Gamble met 0.25NLG!',
+                    time: AddZero(new Date().getHours()) + ":" + AddZero(new Date().getMinutes())
+                });
+                socket.emit('gamble_response', partObj);
+            } else {
+                addChatMessage({
+                    type: 'gamble_error',
+                    message: 'Je hebt niet genoeg saldo om mee te doen met de Gulden Gamble.',
+                    time: AddZero(new Date().getHours()) + ":" + AddZero(new Date().getMinutes())
+                });
+                partObj.gamble = false;
+                socket.emit('gamble_response', partObj);
+            }
         }
         setLocalStorage('changeGamble', []);
     } else if (evt.key == "newRouletteRequest") {
@@ -320,6 +355,7 @@ function checkSocket() {
         socket.on('connect', function () {
             check();
             addChatMessage({
+                type: 'connected',
                 message: 'Je bent nu verbonden!',
                 time: AddZero(new Date().getHours()) + ":" + AddZero(new Date().getMinutes())
             })
@@ -332,6 +368,7 @@ function checkSocket() {
         //});
         socket.on('disconnect', function () {
             addChatMessage({
+                type: 'disconnect',
                 message: 'Verbinding verbroken!',
                 time: AddZero(new Date().getHours()) + ":" + AddZero(new Date().getMinutes())
             })
