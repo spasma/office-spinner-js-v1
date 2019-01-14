@@ -123,6 +123,7 @@ $(function () {
     $('.roulettes').on('click', '.r_accept', function (e) {
         e.preventDefault();
         $(this).parent().html('Bezig..');
+        var roulette_id = $(this).data('roulette');
         $.post('http://kantoorroulette.nl/api/response', {roulette_id: roulette_id, reaction: "1"}, function (data) {
             data = jQuery.parseJSON(data);
             if (data.success == 1) {
@@ -133,6 +134,7 @@ $(function () {
     $('.roulettes').on('click', '.r_decline', function (e) {
         e.preventDefault();
         $(this).parent().html('Bezig..');
+        var roulette_id = $(this).data('roulette');
         $.post('http://kantoorroulette.nl/api/response', {roulette_id: roulette_id, reaction: "2"}, function (data) {
             data = jQuery.parseJSON(data);
             if (data.success == 1) {
