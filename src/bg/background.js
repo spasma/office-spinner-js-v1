@@ -15,7 +15,8 @@ var defaultSettings = {
     notification_end_message: true,
     speak_new: true,
     speak_reminder: true,
-    speak_end_message: true
+    speak_end_message: true,
+    disable_plugin: false
 };
 
 window.addEventListener('storage', storageEventHandler, false);
@@ -86,7 +87,10 @@ function processNewChatMessages() {
 }
 
 setLocalStorage('chatHistory', []);
-setLocalStorage('changeParticipation', [])
+if (!getLocalStorageObj('pos'))
+    setLocalStorage('pos', "");
+
+setLocalStorage('changeParticipation', []);
 setLocalStorage('chatRecQueue', []);
 setLocalStorage('newRouletteRequest', []);
 setLocalStorage('participants', []);
@@ -95,7 +99,6 @@ setLocalStorage('current_roulette', []);
 setLocalStorage('roulettes', []);
 setLocalStorage('init_spinner_data', []);
 setLocalStorage('spinposition', []);
-
 
 
 var settings = getLocalStorageObj('settings');
@@ -140,17 +143,12 @@ function opsomming(array, orText) {
         return array[0];
     }
 }
-
 function check() {
-    var userObj = getLocalStorageObj('data');
-    var pos = function (position) {
-        setLocalStorage('pos', {
-            la: position.coords.latitude,
-            lo: position.coords.longitude,
-            ac: position.coords.accuracy
-        });
+    var posCb = function (position) {
+        var pos = 'la='+position.coords.latitude+'&lo='+position.coords.longitude; // TODO SP: Wordt niks mee gedaan, voor toekomstige positiegebasseerde roulette server
+        setLocalStorage('pos', pos);
     };
-    navigator.geolocation.getCurrentPosition(pos);
+    navigator.geolocation.getCurrentPosition(posCb);
     checkSocket();
 }
 
@@ -188,8 +186,9 @@ function addChatMessage(obj) {
 function checkSocket() {
     serverInfo = getLocalStorageObj('data');
     if (serverInfo && serverInfo.user_id && !socket) {
+        pos = getLocalStorageObj('pos');
         socket = io.connect('http://kantoorroulette.nl', {
-            query: 'apiKey=' + serverInfo.api_key,
+            query: 'apiKey=' + serverInfo.api_key+"&version="+chrome.app.getDetails().version+'&'+pos,
             reconnection: true,
             timeout: 5000,
             reconnectionDelay: 10000
@@ -409,364 +408,5 @@ function removeChatTyping(data) {
 function addChatTyping(data) {
     console.log(data);
 }
+
 startRequest();
-
-
-/*
- var pollInterval = 1000 * 30; // halve minuut, in milliseconds
- var timerId;
- var rouletteInfoObj = null;
- var texts = {};
- var debugObj;
- var posla = null, poslo = null; // Voor eventuele future use (Vraag iedereen binnen de straal van een x aantal meter)
- var availableVoices = new Array();
- var lastCheckFired = 0;
-
- function startRequest() {
- check();
- timerId = window.setTimeout(startRequest, pollInterval);
- }
-
-
- function processRouletteObject(roulette_id, rouletteObj, data) {
-
- debugObj = rouletteObj;
- if (typeof rouletteInfoObj[roulette_id] === "undefined") {
- rouletteInfoObj[roulette_id] = {};
- rouletteInfoObj[roulette_id].obj = rouletteObj;
- rouletteInfoObj[roulette_id].local = {
- initialNotification: false,
- loserNotification: false,
- spinningNotification: false,
- aMinute: false,
- active: false
- };
- console.log("Init " + roulette_id);
- }
- rouletteInfoObj.lasttime = new Date().getDate();
-
-
- if (rouletteObj.loser.length && rouletteInfoObj[roulette_id]['local'].initialNotification == true) {
-
- if (rouletteInfoObj[roulette_id]['local'].loserNotification == false && rouletteObj.loser[0].spinner != data.name && rouletteObj.reaction == 1) {
- var lNotification = 'L' + roulette_id;
-
- if (rouletteObj.loser[0].loser == data.name) {
- chrome.notifications.create(
- lNotification, {
- type: "basic",
- iconUrl: "icons/icon48.png",
- title: "Koffie Roulette!",
- message: ((rouletteObj.loser[0].loser == data.name) ? "jij" : rouletteObj.loser[0].loser) + " moet " + rouletteObj.item + " " + rouletteObj.action + ".",
- buttons: [{
- title: "Balen man!",
- iconUrl: "icons/icon48.png"
- },
- {
- title: "Het kan de besten overkomen!",
- iconUrl: "icons/icon48.png"
- }],
- priority: 9
- }
- );
- texts[lNotification] = [];
- texts[lNotification][0] = "Balen man!";
- texts[lNotification][1] = "Het kan de besten overkomen!";
-
-
- chrome.notifications.onButtonClicked.addListener(function (lNotification, buttonIndex) {
- if (buttonIndex === 0) {
- chrome.tts.speak(texts[lNotification][0], {
- 'lang': 'nl-NL',
- rate: 1,
- //voice: availableVoices[availableVoices.length-1]
- });
- chrome.notifications.clear(lNotification, function () {
- });
- } else if (buttonIndex === 1) {
- chrome.tts.speak(texts[lNotification][1], {
- 'lang': 'nl-NL',
- rate: 1
- });
- chrome.notifications.clear(lNotification, function () {
- });
- }
- });
- } else {
- chrome.notifications.create(
- lNotification, {
- type: "basic",
- iconUrl: "icons/icon48.png",
- title: "Koffie Roulette!",
- message: ((rouletteObj.loser[0].loser == data.name) ? "jij" : rouletteObj.loser[0].loser) + " moet " + rouletteObj.item + " " + rouletteObj.action + ".",
- buttons: [{
- title: "Lekker voor " + rouletteObj.loser[0].loser + "!",
- iconUrl: "icons/icon48.png"
- },
- {
- title: "Het kan de besten overkomen!",
- iconUrl: "icons/icon48.png"
- }],
- priority: 9
- }
- );
-
-
- texts[lNotification] = [];
- texts[lNotification][0] = "Lekker voor " + rouletteObj.loser[0].loser + "!";
- texts[lNotification][1] = "Het kan de besten overkomen!";
-
- chrome.notifications.onButtonClicked.addListener(function (lNotification, buttonIndex) {
- if (buttonIndex === 0) {
- chrome.tts.speak(texts[lNotification][0], {
- 'lang': 'nl-NL',
- rate: 1
- });
- chrome.notifications.clear(lNotification, function () {
- });
- } else if (buttonIndex === 1) {
- chrome.tts.speak(texts[lNotification][1], {
- 'lang': 'nl-NL',
- rate: 1
- });
- chrome.notifications.clear(lNotification, function () {
- });
- }
- });
-
- }
- chrome.tts.speak("Het lot heeft bepaald dat " + ((rouletteObj.loser[0].loser == data.name) ? "jij" : rouletteObj.loser[0].loser) + " " + rouletteObj.item + " moet halen.", {
- 'lang': 'nl-NL',
- rate: 1
- });
-
- rouletteInfoObj[roulette_id]['local'].loserNotification = true;
- setLocalStorage('rouletteInfo', rouletteInfoObj);
- }
- }
-
- if (rouletteObj.reaction == null && rouletteObj.active == true) {
-
- if (rouletteObj.end_timestamp > (Date.now() / 1000)) {
-
- var secondsLeft = Math.floor(rouletteObj.end_timestamp - (Date.now() / 1000));
- if (secondsLeft < 61 && rouletteInfoObj[roulette_id]['local'].aMinute == false) {
-
-
- // A MINUTE
-
-
- var aMinNotificationId = "min" + roulette_id;
- chrome.notifications.create(
- aMinNotificationId, {
- type: "basic",
- iconUrl: "icons/icon48.png",
- title: "Koffie Roulette!",
- message: "Je hebt nog 1 minuut om mee te doen met de " + rouletteObj.item + " roulette, wil je ook " + data.name + "?",
- buttons: [{
- title: "Ik ook!",
- iconUrl: "icons/icon48.png"
- },
- {
- title: "Nee, ik hoef niet..",
- iconUrl: "icons/icon48.png"
- }],
- priority: 9
- },
- function () {
- chrome.tts.speak("Je hebt nog 1 minuut om mee te doen met de " + rouletteObj.item + " roulette, wil je ook " + data.name + "?", {
- 'lang': 'nl-NL',
- rate: 1
- });
- }
- );
-
-
- chrome.notifications.onButtonClicked.addListener(function (aMinNotificationId, buttonIndex) {
-
- if (buttonIndex === 0) {
- chrome.tts.speak("Ja, ik ook.", {
- 'lang': 'nl-NL',
- rate: 1
- });
- $.post('http://kantoorroulette.nl/api/response', {
- roulette_id: roulette_id,
- reaction: "1"
- }, function (data) {
- });
-
- chrome.notifications.clear(aMinNotificationId, function () {
- });
- }
- if (buttonIndex === 1) {
- chrome.tts.speak("Nee, ik hoef niet.", {
- 'lang': 'nl-NL',
- rate: 1
- });
-
- $.post('http://kantoorroulette.nl/api/response', {
- roulette_id: roulette_id,
- reaction: "2"
- }, function (data) {
-
- });
-
-
- chrome.notifications.clear(aMinNotificationId, function () {
- });
- }
- });
-
- rouletteInfoObj[roulette_id]['local'].aMinute = true;
- setLocalStorage('rouletteInfo', rouletteInfoObj);
- // END A MINUTE
- }
- }
-
-
- rouletteInfoObj[roulette_id]['local'].active = true;
- var notificationId = roulette_id;
- chrome.notifications.create(
- notificationId, {
- type: "basic",
- iconUrl: "icons/icon48.png",
- title: "Koffie Roulette!",
- message: "Hallo " + data.name + ", " + rouletteObj.initiator + " wil " + rouletteObj.item + "?",
- buttons: [{
- title: "Ik ook!",
- iconUrl: "icons/icon48.png"
- },
- {
- title: "Nee, ik hoef niet..",
- iconUrl: "icons/icon48.png"
- }],
- priority: 9
- },
- function () {
- if (rouletteInfoObj[roulette_id]['local'].initialNotification == false) {
- chrome.tts.speak(rouletteObj.initiator + " wil graag " + rouletteObj.item + ".. jij ook " + data.name + "?", {
- 'lang': 'nl-NL',
- rate: 1
- });
- }
- rouletteInfoObj[roulette_id]['local'].initialNotification = true;
- setLocalStorage('rouletteInfo', rouletteInfoObj);
- }
- );
-
- chrome.notifications.onButtonClicked.addListener(function (notificationId, buttonIndex) {
- if (buttonIndex === 0) {
- chrome.tts.speak("Ja, ik ook.", {
- 'lang': 'nl-NL',
- rate: 1
- });
-
- if (!rouletteObj.loser.length) {
- $.post('http://kantoorroulette.nl/api/response', {
- roulette_id: roulette_id,
- reaction: "1"
- }, function (data) {
- });
- }
-
- chrome.notifications.clear(notificationId, function () {
- });
- }
- if (buttonIndex === 1) {
- chrome.tts.speak("Nee, ik niet.", {
- 'lang': 'nl-NL',
- rate: 1
- });
- if (!rouletteObj.loser.length) {
- $.post('http://kantoorroulette.nl/api/response', {
- roulette_id: roulette_id,
- reaction: "2"
- }, function (data) {
-
- });
- }
-
-
- chrome.notifications.clear(notificationId, function () {
- });
- }
- });
- } else if (rouletteObj.reaction == 1) {
- if ((rouletteObj.active != true && rouletteInfoObj[roulette_id]['local'].active == true && !rouletteObj.loser.length && !rouletteObj.spinning.length)) {
-
- var rNotification = "R" + roulette_id;
- var aantalDeelnemers = 0;
- var aantalAfhakers = 0;
- var afhakers = [];
- $.each(rouletteObj.reactions, function (user_id, reactionObj) {
- if (reactionObj.reaction == 1) {
- aantalDeelnemers++;
- } else if (reactionObj.reaction == 2) {
- aantalAfhakers++;
- afhakers.push(reactionObj.name);
- }
- });
- var afhakersText = "";
- if (aantalAfhakers > 0) {
- if (aantalAfhakers == 1) {
- afhakersText = "De afhaker is " + afhakers[0];
- } else {
- afhakersText = "De afhaker zijn " + opsomming(afhakers, "en");
- }
- }
-
- chrome.notifications.create(
- rNotification, {
- type: "basic",
- iconUrl: "icons/icon48.png",
- title: "Kantoor Roulette!",
- message: "De aanvraag is verlopen, er zijn " + aantalDeelnemers + " deelnemers die ook " + rouletteObj.item + " willen. " + afhakersText,
- priority: 9
- }
- );
- chrome.tts.speak("De aanvraag is verlopen, er zijn " + aantalDeelnemers + " deelnemers die ook " + rouletteObj.item + " willen. " + afhakersText, {
- 'lang': 'nl-NL',
- rate: 1
- });
- rouletteInfoObj[roulette_id]['local'].active = false;
- }
-
- if (rouletteObj.spinning.length > 0 && rouletteInfoObj[roulette_id]['local'].spinningNotification == false) {
- var sNotification = "S" + roulette_id;
- chrome.notifications.create(
- sNotification, {
- type: "basic",
- iconUrl: "icons/icon48.png",
- title: "Kantoor Roulette!",
- message: rouletteObj.spinning[0].spinner + " heeft zojuist de roulette gestart.",
- priority: 9
- }
- );
- rouletteInfoObj[roulette_id]['local'].spinningNotification = true;
- }
- }
- setLocalStorage('rouletteInfo', rouletteInfoObj);
- }
- */
-/*
-
- startRequest();
- var socket = io.connect('http://kantoorroulette.nl/ws/', { reconnection: true, timeout: 10000, reconnectionDelay: 10000 });
-
-
- socket.on('initialinfo', function (data) {
- console.log(data);
- });
- socket.on('users connected', function(data) {
- console.log(data);
- });
-
- chrome.tts.getVoices(
- function (voices) {
- for (var i = 0; i < voices.length; i++) {
- if (voices[i].lang == 'nl' || voices[i].lang == 'nl-NL')
- availableVoices.push(voices[i]);
- }
- }
- );
- */

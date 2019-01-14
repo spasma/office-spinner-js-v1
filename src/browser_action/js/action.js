@@ -5,6 +5,14 @@ var participants;
 var socket;
 var myId;
 
+$(function() {
+    wdtEmojiBundle.defaults.emojiSheets = {
+        'apple'   : 'sheets/sheet_apple_64.png',
+    };
+    //
+    wdtEmojiBundle.init('.wdt-emoji-bundle-enabled');
+    wdtEmojiBundle.changeType('apple');
+});
 
 function strip_tags(input, allowed) {
     allowed = (((allowed || '') + '')
@@ -35,7 +43,7 @@ function createMessageHtml(obj) {
     //fa fa-plus-circle
 
 
-    return '<div class="row"><div class="large-12 medium-12 small-12 columns">' + text + '</div></div>';
+    return '<div class="row"><div class="large-12 medium-12 small-12 columns">' + wdtEmojiBundle.render(text) + '</div></div>';
 }
 
 function updateData() {
@@ -86,33 +94,56 @@ function AddZero(num) {
 }
 function updateRoulettes() {
     var roulettes = getLocalStorageObj('roulettes');
-    $('.roulettes').html("");
+    //$('.roulettes').html("");
     
     $.each(roulettes, function (num, roulette) {
             
         //$('.roulettes').append('<div class="large-12 medium-12 small-12 columns"><i class="fa fa-plus-circle fa-spin"></i> '+roulette.roulette_item+'</div>')
         var date = new Date(roulette.date);
 
-        var partHtml = "";
-        for (var user_id in roulette.participants) {
-            partHtml = partHtml+"<div data-response='"+roulette.participants[user_id].response+"' class='row columns participant part_"+user_id+"'><div class='large-8 medium-8 small-8 columns name'>"+roulette.participants[user_id].name+"</div><div class='large-4 medium-4 small-4 columns response'>"+responseHtmlDone[roulette.participants[user_id].response]+"</div></div>";
+        if (date.getDate() == new Date().getDate()) {
+            if ($('[data-row-roulette="' + roulette.roulette_id + '"]').length) {
+                rouletteContent(roulette);
+                //$('[data-row-roulette="' + roulette.roulette_id + '"] .content').html(newContent);
+            } else {
+                $('.roulettes').prepend("<div class='row' data-row-roulette='" + roulette.roulette_id + "'>" +
+                    "<div class='large-12 medium-12 small-12 columns'>" +
+                    "<div class='click-bar open_roulette' data-roulette='" + roulette.roulette_id + "' style='text-align: left;'>" +
+                    "<a href='#' style='color: #cecece'>" + AddZero(date.getHours()) + ":" + AddZero(date.getMinutes()) + " : <i class='fa fa-plus-circle fa-spin'></i> " + roulette.roulette_item + " " + roulette.roulette_what + " (aanvraag van " + roulette.initiator + ")" + "</a></div>" +
+                    "<div class='content'>" +
+                    rouletteContent(roulette) +
+                    "</div>" +
+                    "</div>" +
+                    "</div>" +
+                    "</div>");
+            }
         }
-        
-        $('.roulettes').prepend("<div class='row'>" +
-            "<div class='large-12 medium-12 small-12 columns'>" +
-                "<div class='click-bar open_roulette' data-roulette='" + roulette.roulette_id + "' style='text-align: left;'>" +
-                "<a href='#' style='color: #cecece'>" + AddZero(date.getHours()) + ":" + AddZero(date.getMinutes()) + " : <i class='fa fa-plus-circle fa-spin'></i> " + roulette.roulette_item + " " + roulette.roulette_what + " (aanvraag van " + roulette.initiator + ")" + "</a></div>" +
-                "<div class='roulette_participants roulette_" + roulette.roulette_id + "' data-roulette='" + roulette.roulette_id + "' style='display: none;'>" +
-            "<div class='losers' style='padding: 0px 12px 12px 12px;'></div> " +
-            "<div class='spin text-center'><a class='button spin_roulette' data-roulette='" + roulette.roulette_id + "' data-spincode='"+roulette.spin_code+"' style='width: 100%;'>Spin deze roulette</a></div>" +
-            "<div class='participants'>"+partHtml+"</div>" +
-            "</div>" +
-            "</div>" +
-            "</div>");
     });
     $('.roulettes .row:first .click-bar a').css('color', '#000');
-    $('.roulette_participants:first').show();
+    if ($('.roulette_participants:visible').length == 0)
+         $('.roulette_participants:first').show();
 }
+function rouletteContent(roulette) {
+    var partHtml = "";
+    var date = new Date(roulette.date);
+    for (var user_id in roulette.participants) {
+        partHtml = partHtml + "<div data-response='" + roulette.participants[user_id].response + "' class='row columns participant part_" + user_id + "'><div class='large-8 medium-8 small-8 columns name'>" + roulette.participants[user_id].name + "</div><div class='large-4 medium-4 small-4 columns response'>" + responseHtmlDone[roulette.participants[user_id].response] + "</div></div>";
+    }
+
+    if ($('[data-row-roulette="' + roulette.roulette_id + '"]').length) {
+        $('[data-row-roulette="' + roulette.roulette_id + '"] .participants').html(partHtml);
+        $('[data-row-roulette="' + roulette.roulette_id + '"] .losers').html((roulette.loser?roulette.loser+' was de verliezer':'Nog geen verliezer bepaald'));
+        return;
+    }
+
+    return "" +
+        "<div class='roulette_participants roulette_" + roulette.roulette_id + "' data-roulette='" + roulette.roulette_id + "' style='display: none;'>" +
+        "<div class='losers text-center' style='padding: 0px 12px 12px 12px; font-size: 12px;'>"+(roulette.loser?roulette.loser+' was de verliezer':'')+"</div> " +
+        "<div class='spin text-center'><a class='button spin_roulette' data-roulette='" + roulette.roulette_id + "' data-spincode='" + roulette.spin_code + "' style='width: 100%;'>Spin deze roulette</a></div>" +
+        "<div class='participants'>" + partHtml + "</div>" +
+        "</div>";
+}
+
 function updateSettingsWindow() {
     var settings = getLocalStorageObj('settings');
     $.each($('.settings-container input[type=checkbox]'), function (num, el) {
@@ -155,6 +186,20 @@ $(function () {
         $('.i_want_coffee_close>span').html("Nee");
         $('.advanced').slideDown();
     });
+
+    $('.disable_coffee').click(function() {
+        var settings = getLocalStorageObj('settings');
+
+        if (settings.disable_plugin !== false) {
+            settings.disable_plugin = false;
+            $('.disable_coffee .fa').addClass('fa-bell').removeClass('fa-bell-slash-o');
+        } else {
+            $('.disable_coffee .fa').addClass('fa-bell-slash-o').removeClass('fa-bell');
+            settings.disable_plugin = 3600;
+        }
+        setLocalStorage('settings', settings);
+    });
+
     $('.settings-toggle').click(function () {
         updateSettingsWindow()
         console.log($(this));
@@ -357,7 +402,7 @@ var responseHtml = {
     2: '<i class="fa fa-times-circle"></i> Nee'
 };
 var responseHtmlSelf = {
-    null: '<i class="fa fa-spinner fa-spin"></i>',
+    null: '<i class="fa fa-spinner fa-spin"></i> <button style="padding: 1px 6px; margin-top: 6px; margin:0;" class="button changeYes right">Ik ook</button>',
     1: '<i class="fa fa-check-circle"></i> Ja <button style="padding: 1px 6px;  margin-top: 6px; margin:0;" class="button changeNo right">Toch niet</button>',
     2: '<i class="fa fa-times-circle"></i> Nee <button style="padding: 1px 6px; margin-top: 6px; margin:0;" class="button changeYes right">Toch wel</button>'
 };
@@ -396,7 +441,10 @@ function currentRoulette(noEffect) {
 
         $('.request_text').html(current_roulette.roulette.roulette_item+" "+current_roulette.roulette.roulette_what+" (aanvraag door "+current_roulette.roulette.initiator+")");
         $('.request_time').html(secondsLeft+" seconden te gaan.");
-        
+
+        var numWant = 0;
+        var numParticipants = Object.keys(current_roulette.participants).length;
+
         for (var user_id in current_roulette.participants) {
             if ($('.request_participants>.part_'+user_id).length == 0) {
                 $('.request_participants').append($("<div data-response='"+current_roulette.participants[user_id].response+"' class='row participant part_"+user_id+"'><div class='large-8 medium-8 small-8 columns name'>"+current_roulette.participants[user_id].name+"</div><div class='large-4 medium-4 small-4 columns response'>"+(myId == user_id ? responseHtmlSelf[current_roulette.participants[user_id].response] : responseHtml[current_roulette.participants[user_id].response])+"</div></div>"));
@@ -407,8 +455,17 @@ function currentRoulette(noEffect) {
                     );
                 //}
             }
-            
+            if (current_roulette.participants[user_id].response == 1 || current_roulette.participants[user_id].response == 2)
+                numWant++;
         }
+
+console.log(numWant == numParticipants, numWant, numParticipants);
+        if (numWant == numParticipants) {
+            $('.request_spin').html("<a class='button spin_roulette' data-roulette='" + current_roulette.roulette.roulette_id + "' data-spincode='" + current_roulette.roulette.spin_code + "' style='width: 100%;'>Spin deze roulette</a>");
+        } else {
+            $('.request_spin').html("");
+        }
+
         $('button.changeYes').click(function() {
             setLocalStorage('changeParticipation', {reaction: 1, roulette_id: current_roulette.roulette.roulette_id})
         });
@@ -466,6 +523,3 @@ var initGebruikers=[];
 var users=[];
 var users2=[];
 var users3=[];
-
-
-

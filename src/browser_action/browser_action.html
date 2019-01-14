@@ -6,12 +6,17 @@
     <link rel="stylesheet" type="text/css" href="css/foundation.min.css">
     <link rel="stylesheet" type="text/css" href="css/font-awesome.min.css">
     <link rel="stylesheet" type="text/css" href="css/plugin.css">
+    <link rel="stylesheet" type="text/css" href="css/wdt-emoji-bundle.css">
+
     <script src="js/jquery.js"></script>
     <script src="js/foundation.min.js"></script>
+    <script src="js/emoji.min.js"></script>
+    <script src="js/wdt-emoji-bundle.min.js"></script>
+
     <script src="js/action.js"></script>
     <script src="js/effects.js"></script>
-    <script src="js/colors.min.js"></script>
-    <script src="js/p2.js"></script>
+    <!--<script src="js/colors.min.js"></script>-->
+    <!--<script src="js/p2.js"></script>-->
     <!--<script src="js/spinner.js"></script>-->
 </head>
 <body>
@@ -20,8 +25,19 @@
         <header onselect="return false">
             <div class="row logo collapse">
                 <span class="settings-toggle-container">
-                    <a href="#" class="settings-toggle"><i class="fa fa-cog"></i></a>
+                    <!--<a class="disable_coffee" data-toggle="example-dropdown-1"><i class="fa fa-bell"></i></a>-->
+                    <!--<a href="#" class="settings-toggle"><i class="fa fa-cog"></i></a>-->
                 </span>
+                <ul class="dropdown-pane menu small vertical" id="example-dropdown-1" data-dropdown data-hover="true" data-hover-pane="true">
+                    <li class="text-center" style="margin-bottom: 12px;">Niet storen voor:</li>
+                    <li class="remaining"></li>
+                    <li class="active"><a href="">Uit</a></li>
+                    <li><a>10 minuten</a></li>
+                    <li><a>15 minuten</a></li>
+                    <li><a>30 minuten</a></li>
+                    <li><a>1 uur</a></li>
+                    <li><a>12 uur</a></li>
+                </ul>
                 <div class="large-12 medium-12 small-12 columns">
                     <h1 id="groovy">Kantoor Roulette</h1>
                 </div>
@@ -106,6 +122,7 @@
                 <div class="large-12 medium-12 small-12 columns roulette_request_container" style="display: none;">
                     <form method="post" class="roulette_form">
                         <div class="start_roulette">
+
                             <div class="row i_want_coffee_toggle_container">
                                 <div class="large-12 medium-12 small-12 text-center">
                                     <a class="i_want_coffee_toggle button small">
@@ -169,9 +186,7 @@
                     <div class="text-center request_text">
                         
                     </div>
-                    <div class="text-center request_time">
-                        
-                    </div>
+                    <div class='request_spin text-center'></div>
                     <div class="request_participants">
                         
                     </div>
@@ -187,7 +202,7 @@
 
                 </div>
                 <div>
-                    <input type="text" class="newMessage" placeholder="Typ een chatbericht.."/>
+                    <input type="text" class="newMessage form-control" placeholder="Typ een chatbericht.."/>
                 </div>
             </div>
         </div>
@@ -198,5 +213,44 @@
         </div>
     </div>
 </div>
+<div class="wdt-emoji-popup">
+    <a href="#" class="wdt-emoji-popup-mobile-closer"> &times; </a>
+    <div class="wdt-emoji-menu-content">
+        <div id="wdt-emoji-menu-header">
+            <a class="wdt-emoji-tab active" data-group-name="Recent"></a>
+            <a class="wdt-emoji-tab" data-group-name="People"></a>
+            <a class="wdt-emoji-tab" data-group-name="Nature"></a>
+            <a class="wdt-emoji-tab" data-group-name="Foods"></a>
+            <a class="wdt-emoji-tab" data-group-name="Activity"></a>
+            <a class="wdt-emoji-tab" data-group-name="Places"></a>
+            <a class="wdt-emoji-tab" data-group-name="Objects"></a>
+            <a class="wdt-emoji-tab" data-group-name="Symbols"></a>
+            <a class="wdt-emoji-tab" data-group-name="Flags"></a>
+            <a class="wdt-emoji-tab" data-group-name="Custom"></a>
+        </div>
+        <div class="wdt-emoji-scroll-wrapper">
+            <div id="wdt-emoji-menu-items">
+                <input id="wdt-emoji-search" type="text" placeholder="Search">
+                <h3 id="wdt-emoji-search-result-title">Search Results</h3>
+                <div class="wdt-emoji-sections"></div>
+                <div id="wdt-emoji-no-result">No emoji found</div>
+            </div>
+        </div>
+        <div id="wdt-emoji-footer">
+            <div id="wdt-emoji-preview">
+                <span id="wdt-emoji-preview-img"></span>
+                <div id="wdt-emoji-preview-text">
+                    <span id="wdt-emoji-preview-name"></span><br>
+                    <span id="wdt-emoji-preview-aliases"></span>
+                </div>
+            </div>
+
+            <div id="wdt-emoji-preview-bundle">
+                <span>WDT Emoji Bundle</span>
+            </div>
+        </div>
+    </div>
+</div>
+
 </body>
 </html>

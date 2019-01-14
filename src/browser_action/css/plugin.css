@@ -61,6 +61,13 @@ header {
     font-size: 1.1rem;
 }
 
+.disable_coffee {
+    /*background: #881f0e;*/
+}
+.disable_coffee .fa {
+
+}
+
 #content {
     /*margin-top: 12px;*/
     padding: 12px 0;
