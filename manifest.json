@@ -1,6 +1,6 @@
 {
   "name": "Kantoor Roulette",
-  "version": "0.9.9.6",
+  "version": "0.9.9.7",
   "manifest_version": 2,
   "description": "Officiële Kantoor Roulette Chrome Plugin",
   "homepage_url": "http://kantoorroulette.nl",
@@ -22,6 +22,12 @@
     "default_title": "Koffie!",
     "default_popup": "src/browser_action/browser_action.html"
   },
+  "content_scripts": [
+    {
+      "matches": ["*://kantoorroulette.nl/*"],
+      "js": ["src/content_script/kantoorroulette.nl.js"]
+    }
+  ],
   "permissions": [
     "contextMenus",
     "cookies",

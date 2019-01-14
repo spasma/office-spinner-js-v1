@@ -1,11 +1,8 @@
 var pollInterval = 1000 * 30; // halve minuut, in milliseconds
 var timerId;
 var rouletteInfoObj = {};
-var availableVoices = [];
-var lastCheckFired = 0;
 var socket = false;
 var serverInfo;
-var rouletteBusy = false;
 
 function isDevMode() {
     return false;//!('update_url' in chrome.runtime.getManifest());
