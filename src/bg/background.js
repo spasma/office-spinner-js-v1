@@ -20,7 +20,7 @@ function isDevMode() {
     return false; // !('update_url' in chrome.runtime.getManifest());
 }
 
-chrome.idle.setDetectionInterval(30);
+chrome.idle.setDetectionInterval(300);
 
 chrome.idle.onStateChanged.addListener(function(newstate) {
     var time = new Date();
