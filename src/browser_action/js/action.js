@@ -74,8 +74,6 @@ function updateData() {
         currentRoulette(true);
         setLocalStorage('chatRecQueue', []);
 
-        //processInitRoulette();
-
         var chatMessagesObj = getLocalStorageObj('chatHistory');
         var chatMessages = [];
         if (chatMessagesObj !== null)
@@ -142,8 +140,10 @@ function rouletteContent(roulette) {
                 // $('[data-row-roulette="' + roulette.roulette_id + '"] .losers .message').html('<form><div class="row"><div class="small-9 columns"><input type="text" value="" placeholder="Typ een troostbericht naar '+roulette.loser+'" /></div><div class="small-3 columns"><input type="button" class="button" value="Verstuur"></div></div></form>');
             }
             $('[data-row-roulette="' + roulette.roulette_id + '"] .spin_roulette').hide();
-        } else
+        } else {
             $('[data-row-roulette="' + roulette.roulette_id + '"] .losers').html('Nog geen verliezer bepaald');
+            $('.i_want_coffee_toggle').css('opacity', '0.2').css('background-color', '#CCC').css('color', '#333');
+        }
 
         return;
     }
@@ -458,6 +458,7 @@ $(window).keydown(function (event) {
     }
 });
 
+var spinnerShowTimeout = false;
 
 window.addEventListener('storage', storageEventHandler, false);
 function storageEventHandler(evt) {
@@ -470,19 +471,31 @@ function storageEventHandler(evt) {
     } else if (evt.key == "participants") {
         updateParticipants();
     } else if (evt.key == "init_spinner_data") {
-        //processInitRoulette();
+        checkSpinnerActive();
+        processInitRoulette();
     } else if (evt.key == "spinposition") {
-        //updateSpinPos();
+        if (!rouletteSpinStarted)
+            processInitRoulette();
+        checkSpinnerActive();
+        updateSpinPos();
     }
+}
+
+function checkSpinnerActive() {
+    if (spinnerShowTimeout) {
+        clearTimeout(spinnerShowTimeout);
+    }
+    spinnerShowTimeout = setTimeout(function() { $('.spinner:visible').slideUp(1000); }, 7000);
+
+    $('.spinner:hidden').slideDown(1000);
 }
 
 
 function updateSpinPos() {
     if (wheel) {
         var spinpos = getLocalStorageObj('spinposition');
-        wheel.body.angle = spinpos.angle;
-        wheel.body.angularVelocity = spinpos.angularVelocity;
-
+        wheel.body.angle = spinpos.bodyAngle;
+        arrow.body.angle = spinpos.arrowAngle;
     }
 }
 
@@ -515,8 +528,11 @@ function updateParticipants() {
                 date = new Date(object.disabled);
             participantHtml += "<span class='radius label' " + (object.disabled ? "data-tooltip title='" + object.name + " wil tot " + (date.getHours() + ":" + date.getMinutes()) + " niet gestoord worden.'" : "") + ">" + object.name + (object.disabled ? ' <i class="fa fa-bell-slash"></i>' : '') + "</span>";
         });
-        if ($('.currently-available').html() != participantHtml) {
+        if ($('.currently-available').html() != participantHtml && participantHtml !== "") {
             $('.currently-available').html(participantHtml)
+            $('.start_roulette:hidden').fadeIn(1000);
+        } else {
+            $('.start_roulette:visible').hide();
         }
     }
     $(document).foundation();
@@ -559,6 +575,7 @@ function currentRoulette(noEffect) {
 
         if (numWant == numParticipants) {
             $('.request_spin').html("<a class='button spin_roulette' data-roulette='" + current_roulette.roulette.roulette_id + "' data-spincode='" + current_roulette.roulette.spin_code + "' style='width: 100%;'>Spin deze roulette</a>");
+            $('.i_want_coffee_toggle').css('opacity', '0.2').css('background-color', '#CCC').css('color', '#333');
         } else {
             $('.request_spin').html("");
         }
@@ -599,22 +616,26 @@ function processNewChatMessages(evt) {
     });
 }
 
+var rouletteSpinStarted = false;
 function processInitRoulette() {
-    var spinner_data = getLocalStorageObj('init_spinner_data');
-    if (spinner_data && spinner_data.users) {
+    if (!rouletteSpinStarted) {
+        rouletteSpinStarted = true;
+        var spinner_data = getLocalStorageObj('init_spinner_data');
+        if (spinner_data && spinner_data.users) {
 
-        initGebruikers = spinner_data.initGebruikers;
-        users = spinner_data.users;
-        users2 = spinner_data.users2;
-        //users3 = spinner_data.users3;
-        //aantalGebruikers = spinner_data.aantalGebruikers;
-        //
-        for (i = 0; i < users.length; i++) {
-            Colors[i] = $c.rand();
+            initGebruikers = spinner_data.initGebruikers;
+            users = spinner_data.users;
+            users2 = spinner_data.users2;
+            //users3 = spinner_data.users3;
+            //aantalGebruikers = spinner_data.aantalGebruikers;
+            //
+            for (i = 0; i < users.length; i++) {
+                Colors[i] = $c.rand();
+            }
+
+            $("#drawing_canvas").show();
+            startAll();
         }
-
-        $("#drawing_canvas").show();
-        startAll();
     }
 }
 var Colors = {};

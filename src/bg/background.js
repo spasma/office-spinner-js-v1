@@ -16,7 +16,7 @@ var socket = false;
 var serverInfo;
 
 function isDevMode() {
-    return false;//!('update_url' in chrome.runtime.getManifest());
+    return false//!('update_url' in chrome.runtime.getManifest());
 }
 
 var defaultSettings = {
@@ -31,8 +31,9 @@ var defaultSettings = {
     harco_feature: false // feature bedacht door Harco Janssen van paperblue.nl
 };
 
-window.addEventListener('storage', storageEventHandler, false);
+
 function storageEventHandler(evt) {
+    console.log(evt.key);
     if (evt.key == "chatSentQueue") {
         processNewChatMessages();
     } else if (evt.key == "changeParticipation") {
@@ -43,12 +44,14 @@ function storageEventHandler(evt) {
         setLocalStorage('changeParticipation', []);
     } else if (evt.key == "newRouletteRequest") {
         var sendObj = getLocalStorageObj('newRouletteRequest');
-        if (sendObj.what)
+        if (sendObj && sendObj.what)
             startRoulette(sendObj);
     } else if (evt.key == "settings") {
         checkSettings();
     }
 }
+window.addEventListener('storage', storageEventHandler, false);
+
 
 var disabledCd = false;
 var secondsLeftDisabled = false;
@@ -195,13 +198,18 @@ function opsomming(array, orText) {
         return array[0];
     }
 }
+var connectionTimeout = false;
 function check() {
     var posCb = function (position) {
-        var pos = 'la=' + position.coords.latitude + '&lo=' + position.coords.longitude; // XX SP: Note to self: Hier wordt niks mee gedaan, voor toekomstige positiegebasseerde roulette server ipv ip-gebaseerd. regel dat seb!!!
+        var pos = 'la=' + position.coords.latitude + '&lo=' + position.coords.longitude; // XX SP: Note to self: Voor toekomstige positiegebasseerde roulette server ipv ip-gebaseerd. regel dat seb!!!
         setLocalStorage('pos', pos);
     };
+
+    if (connectionTimeout == false) { // Timeout voor het connecten zodat alles kan laden :)
+        connectionTimeout = setTimeout(function() { checkSocket(); }, 7500);
+    }
+
     navigator.geolocation.getCurrentPosition(posCb);
-    checkSocket();
 }
 
 function AddZero(num) {
@@ -232,12 +240,11 @@ function addChatMessage(obj) {
 }
 
 function checkSettings() {
-    var settings = getLocalStorageObj('settings');
+    settings = getLocalStorageObj('settings');
     var now = new Date();
     if (settings.disable_plugin != false) {
         var disabledPluginUntill = new Date(settings.disable_plugin);
         var secondsLeft = Math.floor((disabledPluginUntill - now) / 1000);
-
         if (secondsLeft > 0) {
             countDownDisabled();
         } else {
@@ -273,11 +280,11 @@ function replaceName(text) {
 }
 
 function checkSocket() {
+    connectionTimeout = false;
     serverInfo = getLocalStorageObj('data');
     pos = getLocalStorageObj('pos');
     var query = 'apiKey=' + serverInfo.api_key + "&version=" + chrome.app.getDetails().version + '&' + pos + '&debug=' + (isDevMode() ? '1' : '0')
     if (serverInfo && serverInfo.user_id && !socket) {
-
         socket = io.connect('http://kantoorroulette.nl', {
             query: query,
             // path: (isDevMode()?'/socket.dev':'/socket.io'),
@@ -347,6 +354,10 @@ function checkSocket() {
         });
 
         socket.on('spinposition', function (obj) {
+            if (obj.spinnerData) {
+                setLocalStorage('init_spinner_data', obj.spinnerData);
+                delete obj.spinnerData;
+            }
             setLocalStorage('spinposition', obj);
         });
 

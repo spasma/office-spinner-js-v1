@@ -8,8 +8,8 @@ body, html {
     /*padding: 6px;*/
     margin: 0px;
     padding: 0px;
-    height: 590px;
-    width: 400px;
+    height: 600px;
+    width: 450px;
     font-family: Helvetica, Ubuntu, Arial, sans-serif;
     cursor: default;
 }
@@ -167,9 +167,11 @@ a.emoji {
 .i_want_coffee_done,.i_want_coffee_error,.i_want_coffee_load {
     text-align: center;   
 }
+.spinner {
 
+}
 #drawing_canvas {
-    display: none;
+    /*display: none;*/
 }
 .confirm_buttons {
     display: block;
@@ -208,7 +210,9 @@ a.emoji {
 :focus {
     outline: none !important;
 }
-
+.request_participants {
+    margin-bottom: 12px;
+}
 .request_participants>.participant:nth-child(odd),.roulettes>.row:nth-child(odd) {
     background: #f9f9f9;
 }
@@ -259,3 +263,7 @@ a.emoji {
 .wdt-emoji-popup h3.sticky {
     width: 100%;
 }
+/*.spin_roulette {*/
+    /*background: #881f0e;*/
+    /*color: #FFF;*/
+/*}*/

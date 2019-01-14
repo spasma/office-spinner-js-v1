@@ -3,39 +3,39 @@ jQuery.fn.random = function () {
     return jQuery(this[randomIndex]);
 };
 // COFFEE SMOKE EFFECT
-$(function () {
-    var a = 0;
-    for (; a < 10; a += 1) {
-        setTimeout(function b() {
-            if ($('.fa-coffee:visible').length) {
-                var randEl = $('.fa-coffee:visible').random();
-
-                var a = Math.random() * 1e3 + 5e3, c = $("<div />", {
-                    "class": "smoke",
-                    css: {opacity: 0, top: randEl.offset().top, left: randEl.offset().left}
-                });
-                $(c).appendTo("#mainPopup");
-                $.when($(c).animate({opacity: 1}, {
-                    duration: a / 4, easing: "linear", queue: false, complete: function () {
-                        $(c).animate({opacity: 0}, {duration: a / 2, easing: "linear", queue: false})
-                    }
-                }), $(c).animate({
-                    top: 0,
-                    marginLeft: (Math.random() > 0.5) ? -Math.random() * 40 : (Math.random() * 40)
-                }, {
-                    duration: a,
-                    easing: "linear",
-                    queue: false
-                })).then(function () {
-                    $(c).remove();
-                    b()
-                });
-            } else {
-                setTimeout(b, 1000);
-            }
-        }, 500 + Math.random() * 2000)
-    }
-});
+// $(function () {
+//     var a = 0;
+//     for (; a < 10; a += 1) {
+//         setTimeout(function b() {
+//             if ($('.fa-coffee:visible').length) {
+//                 var randEl = $('.fa-coffee:visible').random();
+//
+//                 var a = Math.random() * 1e3 + 5e3, c = $("<div />", {
+//                     "class": "smoke",
+//                     css: {opacity: 0, top: randEl.offset().top, left: randEl.offset().left}
+//                 });
+//                 $(c).appendTo("#mainPopup");
+//                 $.when($(c).animate({opacity: 1}, {
+//                     duration: a / 4, easing: "linear", queue: false, complete: function () {
+//                         $(c).animate({opacity: 0}, {duration: a / 2, easing: "linear", queue: false})
+//                     }
+//                 }), $(c).animate({
+//                     top: 0,
+//                     marginLeft: (Math.random() > 0.5) ? -Math.random() * 40 : (Math.random() * 40)
+//                 }, {
+//                     duration: a,
+//                     easing: "linear",
+//                     queue: false
+//                 })).then(function () {
+//                     $(c).remove();
+//                     b()
+//                 });
+//             } else {
+//                 setTimeout(b, 1000);
+//             }
+//         }, 500 + Math.random() * 2000)
+//     }
+// });
 
 
 // TEXT EFFECTS

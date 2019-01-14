@@ -13,9 +13,8 @@
     <script src="js/wdt-emoji-bundle.min.js"></script>
     <script src="js/action.js"></script>
     <script src="js/effects.js"></script>
-    <!--<script src="js/colors.min.js"></script>-->
-    <!--<script src="js/p2.js"></script>-->
-    <!--<script src="js/spinner.js"></script>-->
+    <script src="js/colors.min.js"></script>
+    <script src="js/p2.js"></script>
 </head>
 <body>
 <div id="mainPopup" class="collapse">
@@ -44,7 +43,10 @@
                 </div>
             </div>
         </header>
-        <!--<canvas id="drawing_canvas" style="width: 400px;"></canvas>-->
+        <div class="spinner" style="display: none;">
+            <h3 id="status_label" style="display: none;">loading...</h3>
+            <canvas id="drawing_canvas" style="width: 400px;"></canvas>
+        </div>
         <div class="login" style="display: none;">
             <div class="row login-container">
                 <div class="large-12 medium-12 small-12 text-center subheader">
@@ -114,7 +116,9 @@
             <div class="row currently-container no-select">
                 <div class="large-12 medium-12 small-12">
                     <div>Momenteel aanwezig:</div>
-                    <div class="currently-available"></div>
+                    <div class="currently-available">
+                        <span class='radius label warning'><i class="fa fa-spin fa-spinner"></i> Momentje.. Bezig met verbinden..</span></div>
+                    </div>
                 </div>
             </div>
             <div id="content" class="row">
@@ -228,5 +232,6 @@
         </div>
     </div>
 </div>
+<script src="js/spinner.js"></script>
 </body>
 </html>
