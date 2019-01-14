@@ -78,8 +78,12 @@ function updateData(data) {
         $("span.name").html(data.name);
         if (data.balance !== undefined) {
             gamble = true;
+            guldenRate = false;
+            if (data.guldenRate) {
+                guldenRate = data.guldenRate;
+            }
             $('.gamble').show();
-            $('.balance').css('margin-left', '6px').html('(Saldo: <a target="_blank" href="https://kantoorroulette.nl/account/gulden"><i class="guldensign"></i>'+data.balance.toFixed(2)+'</a>)');
+            $('.balance').css('margin-left', '6px').html('(Saldo: <a target="_blank" href="https://kantoorroulette.nl/account/gulden"><i class="guldensign"></i>'+data.balance.toFixed(2)+'</a>'+(guldenRate?'  = &euro;'+(guldenRate*data.balance.toFixed(2)).toFixed(2).replace('.', ',')+'':'')+')');
             settings = getLocalStorageObj('settings');
             settings.balance = data.balance;
             setLocalStorage('settings', settings);
@@ -582,32 +586,32 @@ var responseHtmlDone = {
 var gambleHtml = {
     null: '',
     'undefined': '<i data-tooltip title="deed niet mee met de Gulden-gamble" class="guldensign" style="color: #999;"></i>',
-    1: '<i data-tooltip title="doet mee met de Gulden-gamble" class="guldensign" style="color: #1169D6;  border: 1px solid rgba(58, 219, 118, 0.38); padding: 2px 0 2px 4px; margin:0;"></i>',
-    2: '<i data-tooltip title="deed niet mee met de Gulden-gamble" class="guldensign" style="color: #999; border: 1px solid rgba(236, 88, 64, 0.38); padding: 2px 0 2px 4px; margin:0;"></i>',
-    3: '<i data-tooltip title="deed mee met de Gulden-gamble en zat in de spin" class="guldensign" style="color: #1169D6; border: 1px solid rgba(58, 219, 118, 0.38); padding: 2px 0 2px 4px; margin:0;"></i>', // Deed echt mee
-    4: '<i data-tooltip title="deed mee met de Gulden-gamble, maar zat niet in de spin, betaalt dus niks" class="guldensign" style="color: rgba(236, 88, 64, 0.38); border: 1px solid rgba(236, 88, 64, 0.38);"></i>', // Gediskwalificeerd (betaalt niks, niet meegedaan in de spin)
-    5: '<i data-tooltip title="deed mee met de Gulden-gamble, maar had geen saldo" class="guldensign" style="color: rgba(236, 88, 64, 0.38); border: 1px solid rgba(236, 88, 64, 0.38);"></i>' // Gediskwalificeerd
+    1: '<i style="padding: 2px 0 2px 4px; margin:0; color: #1169D6;  border: 1px solid rgba(58, 219, 118, 0.38);" data-tooltip title="doet mee met de Gulden-gamble" class="guldensign"></i>',
+    2: '<i style="padding: 2px 0 2px 4px; margin:0;color: #999; border: 1px solid rgba(236, 88, 64, 0.38);" data-tooltip title="deed niet mee met de Gulden-gamble" class="guldensign"></i>',
+    3: '<i style="padding: 2px 0 2px 4px; margin:0;color: #1169D6; border: 1px solid rgba(58, 219, 118, 0.38);" data-tooltip title="deed mee met de Gulden-gamble en zat in de spin" class="guldensign"></i>', // Deed echt mee
+    4: '<i style="padding: 2px 0 2px 4px; margin:0;color: rgba(236, 88, 64, 0.38); border: 1px solid rgba(236, 88, 64, 0.38);" data-tooltip title="deed mee met de Gulden-gamble, maar zat niet in de spin, betaalt dus niks" class="guldensign"></i>', // Gediskwalificeerd (betaalt niks, niet meegedaan in de spin)
+    5: '<i style="padding: 2px 0 2px 4px; margin:0;color: rgba(236, 88, 64, 0.38); border: 1px solid rgba(236, 88, 64, 0.38);" data-tooltip title="deed mee met de Gulden-gamble, maar had geen saldo" class="guldensign"></i>' // Gediskwalificeerd
 };
 
 var gambleHtmlDone = {
     null: '',
-    1: '<i data-tooltip title="deed niet mee met de roulette" class="guldensign" style="color: #999; border: 1px solid rgba(236, 88, 64, 0.38); padding: 2px 0 2px 4px; margin:0;"></i>',
-    2: '<i data-tooltip title="deed niet mee met de Gulden-gamble" class="guldensign" style="color: #999; border: 1px solid rgba(236, 88, 64, 0.38); padding: 2px 0 2px 4px; margin:0;"></i>',
-    3: '<i data-tooltip title="deed mee met de Gulden-gamble en zat in de spin" class="guldensign" style="color: #1169D6; border: 1px solid rgba(58, 219, 118, 0.38); padding: 2px 0 2px 4px; margin:0;"></i>', // Deed echt mee
-    4: '<i data-tooltip title="deed mee met de Gulden-gamble, maar zat niet in de spin, betaalt dus niks" class="guldensign" style="color: rgba(236, 88, 64, 0.38); border: 1px solid rgba(236, 88, 64, 0.38);"></i>', // Gediskwalificeerd (betaalt niks, niet meegedaan in de spin)
-    5: '<i data-tooltip title="deed mee met de Gulden-gamble, maar had geen saldo" class="guldensign" style="color: rgba(236, 88, 64, 0.38); border: 1px solid rgba(236, 88, 64, 0.38);"></i>' // Gediskwalificeerd
+    1: '<i class="guldensign" style="padding: 2px 0 2px 4px; margin:0;color: #999; border: 1px solid rgba(236, 88, 64, 0.38);" data-tooltip title="deed niet mee met de roulette" ></i>',
+    2: '<i class="guldensign" style="padding: 2px 0 2px 4px; margin:0;color: #999; border: 1px solid rgba(236, 88, 64, 0.38);" data-tooltip title="deed niet mee met de Gulden-gamble" ></i>',
+    3: '<i class="guldensign" style="padding: 2px 0 2px 4px; margin:0;color: #1169D6; border: 1px solid rgba(58, 219, 118, 0.38);" data-tooltip title="deed mee met de Gulden-gamble en zat in de spin" ></i>', // Deed echt mee
+    4: '<i class="guldensign" style="padding: 2px 0 2px 4px; margin:0;color: rgba(236, 88, 64, 0.38); border: 1px solid rgba(236, 88, 64, 0.38);" data-tooltip title="deed mee met de Gulden-gamble, maar zat niet in de spin, betaalt dus niks" ></i>', // Gediskwalificeerd (betaalt niks, niet meegedaan in de spin)
+    5: '<i class="guldensign" style="padding: 2px 0 2px 4px; margin:0;color: rgba(236, 88, 64, 0.38); border: 1px solid rgba(236, 88, 64, 0.38);" data-tooltip title="deed mee met de Gulden-gamble, maar had geen saldo" ></i>' // Gediskwalificeerd
 };
 var gambleHtmlSelf = {
     'undefined':    '<a class="button changeGambleYes" style="background: #FFF; padding: 2px 0 2px 4px; margin:0;"><i class="guldensign" style="color: #999; cursor: pointer;"></i></a>',
     null:           '<a class="button changeGambleYes" style="background: #FFF; padding: 2px 0 2px 4px; margin:0;"><i class="guldensign " style="color: #999; cursor: pointer;"></i></a>',
-    1:              '<a class="button changeGambleNo"  style="text-align: center; background: #FFF; border: 1px solid rgba(58, 219, 118, 0.38); padding: 2px 0 2px 4px; margin:0;"><i class="guldensign " style="color: #1169D6; cursor: pointer;"></i></a>',
-    2:              '<a class="button changeGambleYes" style="background: #FFF; border: 1px solid rgba(236, 88, 64, 0.38); padding: 2px 0 2px 4px; margin:0;"><i class="guldensign " style="color: #999; cursor: pointer;"></i></a>'
+    1:              '<a class="button changeGambleNo"  style="background: #FFF; padding: 2px 0 2px 4px; margin:0; border: 1px solid rgba(58, 219, 118, 0.38); text-align: center;"><i class="guldensign " style="color: #1169D6; cursor: pointer;"></i></a>',
+    2:              '<a class="button changeGambleYes" style="background: #FFF; padding: 2px 0 2px 4px; margin:0; border: 1px solid rgba(236, 88, 64, 0.38);"><i class="guldensign " style="color: #999; cursor: pointer;"></i></a>'
 };
 var gambleHtmlSelfAfter = {
     'undefined':    '<a class="button changeGambleAfterYes" style="background: #FFF; padding: 2px 0 2px 4px; margin:0;"><i class="guldensign" style="color: #999; cursor: pointer;"></i></a>',
     null:           '<a class="button changeGambleAfterYes" style="background: #FFF; padding: 2px 0 2px 4px; margin:0;"><i class="guldensign " style="color: #999; cursor: pointer;"></i></a>',
-    1:              '<a class="button changeGambleAfterNo"  style="text-align: center; background: #FFF; border: 1px solid rgba(58, 219, 118, 0.38); padding: 2px 0 2px 4px; margin:0;"><i class="guldensign " style="color: #1169D6; cursor: pointer;"></i></a>',
-    2:              '<a class="button changeGambleAfterYes" style="background: #FFF; border: 1px solid rgba(236, 88, 64, 0.38); padding: 2px 0 2px 4px; margin:0;"><i class="guldensign " style="color: #999; cursor: pointer;"></i></a>'
+    1:              '<a class="button changeGambleAfterNo"  style="background: #FFF; padding: 2px 0 2px 4px; margin:0; text-align: center;  border: 1px solid rgba(58, 219, 118, 0.38); "><i class="guldensign " style="color: #1169D6; cursor: pointer;"></i></a>',
+    2:              '<a class="button changeGambleAfterYes" style="background: #FFF; padding: 2px 0 2px 4px; margin:0; border: 1px solid rgba(236, 88, 64, 0.38); "><i class="guldensign " style="color: #999; cursor: pointer;"></i></a>'
 };
 
 function updateParticipants() {
